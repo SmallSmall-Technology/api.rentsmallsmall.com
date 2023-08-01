@@ -46,7 +46,7 @@ return [
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
-            'host' => env('DB_HOST', 'rss.cbhrg1lzyru7.eu-west-1.rds.amazonaws.com'),
+            'host' => env('DB_HOST', 'rss.cojxxisixk5c.eu-west-1.rds.amazonaws.com'),
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'rentsmallsmall_furnisure_buytolet_database'),
             'username' => env('DB_USERNAME', 'rentsmallsmall_buytolet'),
