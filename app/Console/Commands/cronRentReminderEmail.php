@@ -189,7 +189,7 @@ body {
                     This is to notify you that your subscription will be due in 7 days time.<br> 
                     You can make payment before the due date in order to increase your credit score with RSS.<br>
                     <br><strong>Kindly click the Pay Now button 
-                        <a href="https://rent.smallsmall.com/user/dashboard">
+                    
                             <button class="button">
                                 <span class="button__text">
                                 <span>P</span><span>a</span>y</span><span> </span><span>N</span><span>o</span><span>w</span><span></span><span></span>
