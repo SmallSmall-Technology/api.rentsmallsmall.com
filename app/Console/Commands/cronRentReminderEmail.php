@@ -161,7 +161,7 @@ body {
   background-color: #007dc1;
   color: #fff;
   font-size: 21px;
-  font-family: "Lato", sans-serif;
+  font-family: sans-serif;
   cursor: pointer;
   box-shadow: rgba(0, 9, 61, 0.2) 0px 4px 8px 0px;
 }
