@@ -143,8 +143,6 @@ class cronRentReminderEmail extends Command
 
 /* styling */
 
-@import url("fonts.googleapis.com/css2?family=Lato:wght@300;400&display=swap");
-
 body {
   height: 100vh;
   display: flex;
