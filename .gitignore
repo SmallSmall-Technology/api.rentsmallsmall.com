@@ -5,3 +5,5 @@ npm-debug.log
 yarn-error.log
 /storage/
 storage/logs/
+/public/storage
+/storage/*.key
