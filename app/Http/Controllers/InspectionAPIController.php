@@ -235,6 +235,106 @@ class InspectionAPIController extends Controller
 
         mail($to2,$subject2,$message2,$headers);
 
+        //new unione template
+        require 'vendor/autoload.php';
+
+$headers = array(
+    'Content-Type' => 'application/json',
+    'Accept' => 'application/json',
+    'X-API-KEY' => '6tkb5syz5g1bgtkz1uonenrxwpngrwpq9za1u6ha',
+);
+
+$client = new \GuzzleHttp\Client([
+    'base_uri' => 'https://us1.unione.io/en/transactional/api/v1/'
+]);
+
+$requestBody = [
+  "message" => [
+    "recipients" => [
+      [
+        "email" => "dikcondtn@yahoo.com",
+        "substitutions" => [
+          "CustomerId" => 12452,
+          "to_name" => "Doveway"
+        ],
+        "metadata" => [
+          "campaign_id" => "c77f4f4e-3561-49f7-9f07-c35be01b4f43",
+          "customer_hash" => "b253ac7"
+        ]
+      ]
+    ],
+    "template_id" => "string",
+    "tags" => [
+      "string1"
+    ],
+    "skip_unsubscribe" => 0,
+    "global_language" => "string",
+    "template_engine" => "simple",
+    "global_substitutions" => [
+      "property1" => "string",
+      "property2" => "string"
+    ],
+    "global_metadata" => [
+      "property1" => "string",
+      "property2" => "string"
+    ],
+    "body" => [
+      "html" => "<b>Hello, {{to_name}}</b>",
+      "plaintext" => "Hello, {{to_name}}",
+      "amp" => "<!doctype html><html amp4email><head> <meta charset=\"utf-8\"><script async src=\"https://cdn.ampproject.org/v0.js\"></script> <style amp4email-boilerplate>body[visibility:hidden]</style></head><body> Hello, AMP4EMAIL world.</body></html>"
+    ],
+    "subject" => "string",
+    "from_email" => "user@example.com",
+    "from_name" => "John Smith",
+    "reply_to" => "user@example.com",
+    "track_links" => 0,
+    "track_read" => 0,
+    "bypass_global" => 0,
+    "bypass_unavailable" => 0,
+    "bypass_unsubscribed" => 0,
+    "bypass_complained" => 0,
+    "headers" => [
+      "X-MyHeader" => "some data",
+      "List-Unsubscribe" => "<mailto: unsubscribe@example.com?subject=unsubscribe>, <http://www.example.com/unsubscribe/{{CustomerId}}>"
+    ],
+    "attachments" => [
+      [
+        "type" => "text/plain",
+        "name" => "readme.txt",
+        "content" => "SGVsbG8sIHdvcmxkIQ=="
+      ]
+    ],
+    "inline_attachments" => [
+      [
+        "type" => "image/gif",
+        "name" => "IMAGECID1",
+        "content" => "R0lGODdhAwADAIABAP+rAP///ywAAAAAAwADAAACBIQRBwUAOw=="
+      ]
+    ],
+    "options" => [
+      "send_at" => "2021-11-19 10:00:00",
+      "unsubscribe_url" => "https://example.org/unsubscribe/{{CustomerId}}",
+      "custom_backend_id" => 0,
+      "smtp_pool_id" => "string"
+    ]
+  ]
+];
+
+try {
+    $response = $client->request('POST','email/send.json', array(
+        'headers' => $headers,
+        'json' => $requestBody,
+       )
+    );
+    print_r($response->getBody()->getContents());
+ }
+ catch (\GuzzleHttp\Exception\BadResponseException $e) {
+    // handle exception or api errors.
+    print_r($e->getMessage());
+ }
+
+ //unione template ends
+
 
             return redirect('https://rentsmallsmall.io/inspection-update-success');
         } else {
