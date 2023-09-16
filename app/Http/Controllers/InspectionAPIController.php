@@ -235,9 +235,9 @@ class InspectionAPIController extends Controller
 
         mail($to2,$subject2,$message2,$headers);
 
-        //new unione template
-        require 'vendor/autoload.php';
+        //new email
 
+        require '../vendor/autoload.php';
 $headers = array(
     'Content-Type' => 'application/json',
     'Accept' => 'application/json',
@@ -254,8 +254,8 @@ $requestBody = [
       [
         "email" => "dikcondtn@yahoo.com",
         "substitutions" => [
-          "CustomerId" => 12452,
-          "to_name" => "Doveway"
+          "CustomerId" => 5761057,
+          "to_name" => "Dove"
         ],
         "metadata" => [
           "campaign_id" => "c77f4f4e-3561-49f7-9f07-c35be01b4f43",
@@ -263,12 +263,12 @@ $requestBody = [
         ]
       ]
     ],
-    "template_id" => "string",
+    "template_id" => "936cc5e8-52e1-11ee-b5d3-eefdb2fabe59",
     "tags" => [
       "string1"
     ],
     "skip_unsubscribe" => 0,
-    "global_language" => "string",
+    "global_language" => "en",
     "template_engine" => "simple",
     "global_substitutions" => [
       "property1" => "string",
@@ -284,9 +284,9 @@ $requestBody = [
       "amp" => "<!doctype html><html amp4email><head> <meta charset=\"utf-8\"><script async src=\"https://cdn.ampproject.org/v0.js\"></script> <style amp4email-boilerplate>body[visibility:hidden]</style></head><body> Hello, AMP4EMAIL world.</body></html>"
     ],
     "subject" => "string",
-    "from_email" => "user@example.com",
+    "from_email" => "cs@smallsmall.com",
     "from_name" => "John Smith",
-    "reply_to" => "user@example.com",
+    "reply_to" => "cs@smallsmall.com",
     "track_links" => 0,
     "track_read" => 0,
     "bypass_global" => 0,
@@ -295,7 +295,7 @@ $requestBody = [
     "bypass_complained" => 0,
     "headers" => [
       "X-MyHeader" => "some data",
-      "List-Unsubscribe" => "<mailto: unsubscribe@example.com?subject=unsubscribe>, <http://www.example.com/unsubscribe/{{CustomerId}}>"
+      "List-Unsubscribe" => "<mailto: unsubscribe@smallsmall.com?subject=unsubscribe>, <http://www.smallsmall.com/unsubscribe/{{CustomerId}}>"
     ],
     "attachments" => [
       [
@@ -312,10 +312,9 @@ $requestBody = [
       ]
     ],
     "options" => [
-      "send_at" => "2021-11-19 10:00:00",
+      "send_at" => "2023-09-16 23:24:00",
       "unsubscribe_url" => "https://example.org/unsubscribe/{{CustomerId}}",
-      "custom_backend_id" => 0,
-      "smtp_pool_id" => "string"
+      
     ]
   ]
 ];
@@ -333,7 +332,7 @@ try {
     print_r($e->getMessage());
  }
 
- //unione template ends
+ ////email end
 
 
             return redirect('https://rentsmallsmall.io/inspection-update-success');
@@ -344,26 +343,6 @@ try {
         }
     }
 
-    // public function updateInspectionStatusAPI(Request $request)
-    // {
-
-    //     $data = array();
-    //     $data['inspection_status'] = $request->inspection_status;
-    //     $data['inspection_remarks'] = $request->inspection_remarks;
-    //     $data['comment'] = $request->comment;
-        
-    //     $update = DB::table('inspection_tbl')->where('id', $request->id)->update($data);
-       
-    //     if ($update) {
- 
-    //         return redirect('https://rentsmallsmall.io/inspection-status-update-success');
-    //     } else {
-
-    //         // return ["update"=>"did not update"];
-    //         return redirect('https://rentsmallsmall.io/inspection-status-update-failed');
-    //     }
-    // }
-    
     public function updateInspectionStatusAPI(Request $request)
     {
 
@@ -375,97 +354,8 @@ try {
         $update = DB::table('inspection_tbl')->where('id', $request->id)->update($data);
        
         if ($update) {
-            if($data['inspection_status'] = 'completed'){
-                //second email
-            $to = 'customerexperience@smallsmall.com';
-            $firstName = $request->firstName;
-            $lastName = $request->lastName;
-            $propertyID = $request->propertyID;
-            $propertyTitle = $request->propertyTitle;
-            $subject = "Inspection Completed";
-
-            $message = "
-            <!---Header starts here ---->
-                <!doctype html>
-                <html>
-                <head>
-                <meta charset='utf-8'>
-                <meta name='viewport' content='width=device-width'>
-                <title></title>
-                </head>
-    
-                <body style='width:100%;padding:0;margin:0;box-sizing:border-box;'>
-                    <div class='container' style='width:95%;min-height:100px;overflow:auto;margin:auto;box-sizing:border-box;'>
-                        <table width='100%'>
-                            <tr>
-                                <td width='33.3%'>&nbsp;</td>
-                                <td style='text-align:center' class='logo-container' width='33.3%'><img width='130px' src='https://www.rentsmallsmall.com/assets/img/logo-rss.png' /></td>
-                                <td width='33.3%'>&nbsp;</td>
-                            </tr>
-                        </table>
-                <!---Header ends here ---->
-    
-                <!---Body starts here ---->
-                        <table width='100%' style='margin-top:30px'>
-                            <tr>
-                                <td width='100%'>
-                                    <div class='message-container' style='width:100%;border-radius:10px;text-align:center;background:#F2FCFB;padding:40px;'>
-                                        <div style='width:100%;	min-height:10px;overflow:auto;text-align:center;font-family:calibri;font-size:30px;margin-bottom:20px;' class='name'>Dear Team,</div>
-                                        <div style='width:100%;min-height:10px;overflow:auto;text-align:center;font-family:calibri;font-size:20px;margin-bottom:20px;' class='intro'>Inspection Completed</div>
-                                        <div style='width:100%;min-height:30px;	overflow:auto;text-align:center;font-family:calibri;font-size:16px;margin-bottom:20px;' class='email-body'>
-                                        
-
-This is to inform you that the inspection of $firstName $lastName to <a href='https://rent.smallsmall.com/property/$propertyID'>($propertyTitle)</a> is completed.<br>
-
-<br><br>
-
-Regards, 
-                                       </div>
-                                        
-                                    </div>
-                                </td>
-                            </tr>
-                        </table> 
-                <!---Body ends here ---->
-    
-                <!---Footer starts here ---->
-                    <div class='footer' style='width:100%;min-height:100px;overflow:auto;margin-top:40px;padding-top:40px;border-top:1px solid #00CDA6;padding:20px;'>
-                            <div style='width:100%;min-height:10px;overflow:auto;margin-bottom:20px;font-family:avenir-regular;font-size:14px;text-align:center;' class='stay-connected-txt'>Stay connected to us</div>
-                            <div style='width:100%;min-height:10px;overflow:auto;margin-bottom:30px;text-align:center;' class='social-spc'>
-                                <ul class='social-container' style='display:inline-block;min-width:100px;min-height:10px;overflow:auto;margin:auto;list-style:none;padding:0;'>
-                                    <li style='width:70px;min-height:10px;overflow:auto;float:left;text-align:center;' class='social-item'><a href='https://www.twitter.com/rentsmallsmall'><img width='50px' height='auto' src='https://www.rentsmallsmall.com/assets/img/twitter.png' /></a></li>
-                                    <li style='width:70px;min-height:10px;overflow:auto;float:left;text-align:center;' class='social-item'><a href='https://www.facebook.com/rentsmallsmall'><img width='50px' height='auto' src='https://www.rentsmallsmall.com/assets/img/facebook.png' /></a></li>
-                                    <li style='width:70px;min-height:10px;overflow:auto;float:left;text-align:center;' class='social-item'><a href='https://www.instagram.com/rentsmallsmall'><img width='50px' height='auto' src='https://www.rentsmallsmall.com/assets/img/instagram.png' /></a></li>
-                                    <li style='width:70px;min-height:10px;overflow:auto;float:left;text-align:center;' class='social-item'><a href='https://www.linkedin.com/company/rentsmallsmall'><img width='50px' height='auto' src='https://www.rentsmallsmall.com/assets/img/linkedin.png' /></a></li>
-                                </ul>
-                            </div>
-                            <div style='width:100%;min-height:30px;overflow:auto;text-align:center;line-height:30px;font-size:14px;font-family:avenir-regular;color:#00CDA6;' class='disclaimer'>
-                                For help contact Customer experience<br />
-                                at 090 722 2669, 0903 633 9800<br /> 
-                                or email to customerexperience@smallsmall.com
-                            </div>
-                        </div>
-                    </div>
-                </body>
-                </html>
-                <!---Footer ends here ---->
-    
-        ";
-    
-                // Always set content-type when sending HTML email
-                $headers = "MIME-Version: 1.0" . "\r\n";
-                $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-    
-                // More headers
-                $headers .= 'From: <noreply@smallsmall.com>' . "\r\n";
-                // $headers .= 'Cc: myboss@example.com' . "\r\n";
-    
-                mail($to,$subject,$message,$headers);
-
-            }
  
-            // return redirect('https://rentsmallsmall.io/inspection-status-update-success');
-            return redirect('https://rentsmallsmall.io/all-pending-inspections-tsr');
+            return redirect('https://rentsmallsmall.io/inspection-status-update-success');
         } else {
 
             // return ["update"=>"did not update"];

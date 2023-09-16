@@ -79,12 +79,12 @@ class LandlordAPIController extends Controller
             $data['email'] = $request->email;
             $data['phone'] = $request->phone;
             $data['password'] = md5($request->password);
-            $data['income'] = '1000';
-            $data['referral'] = 'nil';
+            $data['income'] = $request->income;
+            $data['referral'] = $request->referral;
             $data['status'] = 'Active';
-            $data['verified'] = 'verified';
-            $data['landlord_status'] = $request->landlord_status;
-            $data['interest'] = 'interest';
+            $data['verified'] = $request->verified;
+            // $data['profile_picture'] = $request->profile_picture;
+            $data['interest'] = $request->interest;
             $data['regDate'] = date('Y-m-d H:i:s');
             // $data['available_date'] = date('Y-m-d');
             // $data['dateOfEntry'] = date('Y-m-d H:i:s');
