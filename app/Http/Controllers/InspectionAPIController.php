@@ -245,7 +245,7 @@ $headers = array(
 );
 
 $client = new \GuzzleHttp\Client([
-    'base_uri' => 'https://us1.unione.io/en/transactional/api/v1/'
+    'base_uri' => 'https://eu1.unione.io/en/transactional/api/v1/'
 ]);
 
 $requestBody = [
