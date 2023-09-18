@@ -238,6 +238,7 @@ class InspectionAPIController extends Controller
         //new email
 
         require '../vendor/autoload.php';
+
 $headers = array(
     'Content-Type' => 'application/json',
     'Accept' => 'application/json',
@@ -249,26 +250,10 @@ $client = new \GuzzleHttp\Client([
 ]);
 
 $requestBody = [
-  "message" => [
-    "recipients" => [
-      [
-        "email" => "dikcondtn@yahoo.com",
-        "substitutions" => [
-          "CustomerId" => 5761057,
-          "to_name" => "Dove"
-        ],
-        "metadata" => [
-          "campaign_id" => "c77f4f4e-3561-49f7-9f07-c35be01b4f43",
-          "customer_hash" => "b253ac7"
-        ]
-      ]
-    ],
-    "template_id" => "936cc5e8-52e1-11ee-b5d3-eefdb2fabe59",
-    "tags" => [
-      "string1"
-    ],
-    "skip_unsubscribe" => 0,
-    "global_language" => "en",
+  "template" => [
+    "id" => "936cc5e8-52e1-11ee-b5d3-eefdb2fabe59",
+    "name" => "RSS subscriber Inspection reschedule confirmtation",
+    "editor_type" => "html",
     "template_engine" => "simple",
     "global_substitutions" => [
       "property1" => "string",
@@ -279,23 +264,19 @@ $requestBody = [
       "property2" => "string"
     ],
     "body" => [
-      "html" => "<b>Hello, {{to_name}}</b>",
-      "plaintext" => "Hello, {{to_name}}",
+      "html" => "<b>Hello, {{$inspection_name}}</b>",
+      "plaintext" => "Hello, {{$inspection_name}}",
       "amp" => "<!doctype html><html amp4email><head> <meta charset=\"utf-8\"><script async src=\"https://cdn.ampproject.org/v0.js\"></script> <style amp4email-boilerplate>body[visibility:hidden]</style></head><body> Hello, AMP4EMAIL world.</body></html>"
     ],
-    "subject" => "string",
-    "from_email" => "cs@smallsmall.com",
-    "from_name" => "John Smith",
-    "reply_to" => "cs@smallsmall.com",
+    "subject" => "Property Visit Confirmation",
+    "from_email" => "noreply@smallsmall.com",
+    "from_name" => "Rentsmallsmall",
+    "reply_to" => "noreply@smallsmall.com",
     "track_links" => 0,
     "track_read" => 0,
-    "bypass_global" => 0,
-    "bypass_unavailable" => 0,
-    "bypass_unsubscribed" => 0,
-    "bypass_complained" => 0,
     "headers" => [
       "X-MyHeader" => "some data",
-      "List-Unsubscribe" => "<mailto: unsubscribe@smallsmall.com?subject=unsubscribe>, <http://www.smallsmall.com/unsubscribe/{{CustomerId}}>"
+      "List-Unsubscribe" => "<mailto: unsubscribe@example.com?subject=unsubscribe>, <http://www.example.com/unsubscribe/{{CustomerId}}>"
     ],
     "attachments" => [
       [
@@ -310,17 +291,12 @@ $requestBody = [
         "name" => "IMAGECID1",
         "content" => "R0lGODdhAwADAIABAP+rAP///ywAAAAAAwADAAACBIQRBwUAOw=="
       ]
-    ],
-    "options" => [
-      "send_at" => "2023-09-16 23:24:00",
-      "unsubscribe_url" => "https://example.org/unsubscribe/{{CustomerId}}",
-      
     ]
   ]
 ];
 
 try {
-    $response = $client->request('POST','email/send.json', array(
+    $response = $client->request('POST','template/set.json', array(
         'headers' => $headers,
         'json' => $requestBody,
        )
