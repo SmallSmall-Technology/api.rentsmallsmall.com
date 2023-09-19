@@ -2,11 +2,8 @@
 
 namespace Illuminate\Broadcasting\Broadcasters;
 
-use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Contracts\Redis\Factory as Redis;
 use Illuminate\Support\Arr;
-use Predis\Connection\ConnectionException;
-use RedisException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class RedisBroadcaster extends Broadcaster
@@ -23,16 +20,16 @@ class RedisBroadcaster extends Broadcaster
     /**
      * The Redis connection to use for broadcasting.
      *
-     * @var string|null
+     * @var string
      */
-    protected $connection = null;
+    protected $connection;
 
     /**
      * The Redis key prefix.
      *
      * @var string
      */
-    protected $prefix = '';
+    protected $prefix;
 
     /**
      * Create a new broadcaster instance.
@@ -63,9 +60,8 @@ class RedisBroadcaster extends Broadcaster
             str_replace($this->prefix, '', $request->channel_name)
         );
 
-        if (empty($request->channel_name) ||
-            ($this->isGuardedChannel($request->channel_name) &&
-            ! $this->retrieveUser($request, $channelName))) {
+        if ($this->isGuardedChannel($request->channel_name) &&
+            ! $this->retrieveUser($request, $channelName)) {
             throw new AccessDeniedHttpException;
         }
 
@@ -89,14 +85,8 @@ class RedisBroadcaster extends Broadcaster
 
         $channelName = $this->normalizeChannelName($request->channel_name);
 
-        $user = $this->retrieveUser($request, $channelName);
-
-        $broadcastIdentifier = method_exists($user, 'getAuthIdentifierForBroadcasting')
-                        ? $user->getAuthIdentifierForBroadcasting()
-                        : $user->getAuthIdentifier();
-
         return json_encode(['channel_data' => [
-            'user_id' => $broadcastIdentifier,
+            'user_id' => $this->retrieveUser($request, $channelName)->getAuthIdentifier(),
             'user_info' => $result,
         ]]);
     }
@@ -108,8 +98,6 @@ class RedisBroadcaster extends Broadcaster
      * @param  string  $event
      * @param  array  $payload
      * @return void
-     *
-     * @throws \Illuminate\Broadcasting\BroadcastException
      */
     public function broadcast(array $channels, $event, array $payload = [])
     {
@@ -125,16 +113,10 @@ class RedisBroadcaster extends Broadcaster
             'socket' => Arr::pull($payload, 'socket'),
         ]);
 
-        try {
-            $connection->eval(
-                $this->broadcastMultipleChannelsScript(),
-                0, $payload, ...$this->formatChannels($channels)
-            );
-        } catch (ConnectionException|RedisException $e) {
-            throw new BroadcastException(
-                sprintf('Redis error: %s.', $e->getMessage())
-            );
-        }
+        $connection->eval(
+            $this->broadcastMultipleChannelsScript(),
+            0, $payload, ...$this->formatChannels($channels)
+        );
     }
 
     /**

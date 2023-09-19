@@ -1,47 +1,62 @@
 <?php
 
-namespace {{ namespace }};
+namespace DummyNamespace;
 
-use {{ namespacedModel }};
+use NamespacedDummyModel;
 
-class {{ class }}
+class DummyClass
 {
     /**
-     * Handle the {{ model }} "created" event.
+     * Handle the DocDummyModel "created" event.
+     *
+     * @param  \NamespacedDummyModel  $dummyModel
+     * @return void
      */
-    public function created({{ model }} ${{ modelVariable }}): void
+    public function created(DummyModel $dummyModel)
     {
         //
     }
 
     /**
-     * Handle the {{ model }} "updated" event.
+     * Handle the DocDummyModel "updated" event.
+     *
+     * @param  \NamespacedDummyModel  $dummyModel
+     * @return void
      */
-    public function updated({{ model }} ${{ modelVariable }}): void
+    public function updated(DummyModel $dummyModel)
     {
         //
     }
 
     /**
-     * Handle the {{ model }} "deleted" event.
+     * Handle the DocDummyModel "deleted" event.
+     *
+     * @param  \NamespacedDummyModel  $dummyModel
+     * @return void
      */
-    public function deleted({{ model }} ${{ modelVariable }}): void
+    public function deleted(DummyModel $dummyModel)
     {
         //
     }
 
     /**
-     * Handle the {{ model }} "restored" event.
+     * Handle the DocDummyModel "restored" event.
+     *
+     * @param  \NamespacedDummyModel  $dummyModel
+     * @return void
      */
-    public function restored({{ model }} ${{ modelVariable }}): void
+    public function restored(DummyModel $dummyModel)
     {
         //
     }
 
     /**
-     * Handle the {{ model }} "force deleted" event.
+     * Handle the DocDummyModel "force deleted" event.
+     *
+     * @param  \NamespacedDummyModel  $dummyModel
+     * @return void
      */
-    public function forceDeleted({{ model }} ${{ modelVariable }}): void
+    public function forceDeleted(DummyModel $dummyModel)
     {
         //
     }

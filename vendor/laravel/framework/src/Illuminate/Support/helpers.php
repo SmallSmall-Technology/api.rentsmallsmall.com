@@ -3,11 +3,10 @@
 use Illuminate\Contracts\Support\DeferringDisplayableValue;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Env;
 use Illuminate\Support\HigherOrderTapProxy;
 use Illuminate\Support\Optional;
-use Illuminate\Support\Sleep;
-use Illuminate\Support\Str;
 
 if (! function_exists('append_config')) {
     /**
@@ -99,11 +98,154 @@ if (! function_exists('class_uses_recursive')) {
     }
 }
 
+if (! function_exists('collect')) {
+    /**
+     * Create a collection from the given value.
+     *
+     * @param  mixed  $value
+     * @return \Illuminate\Support\Collection
+     */
+    function collect($value = null)
+    {
+        return new Collection($value);
+    }
+}
+
+if (! function_exists('data_fill')) {
+    /**
+     * Fill in data where it's missing.
+     *
+     * @param  mixed  $target
+     * @param  string|array  $key
+     * @param  mixed  $value
+     * @return mixed
+     */
+    function data_fill(&$target, $key, $value)
+    {
+        return data_set($target, $key, $value, false);
+    }
+}
+
+if (! function_exists('data_get')) {
+    /**
+     * Get an item from an array or object using "dot" notation.
+     *
+     * @param  mixed  $target
+     * @param  string|array|int|null  $key
+     * @param  mixed  $default
+     * @return mixed
+     */
+    function data_get($target, $key, $default = null)
+    {
+        if (is_null($key)) {
+            return $target;
+        }
+
+        $key = is_array($key) ? $key : explode('.', $key);
+
+        foreach ($key as $i => $segment) {
+            unset($key[$i]);
+
+            if (is_null($segment)) {
+                return $target;
+            }
+
+            if ($segment === '*') {
+                if ($target instanceof Collection) {
+                    $target = $target->all();
+                } elseif (! is_array($target)) {
+                    return value($default);
+                }
+
+                $result = [];
+
+                foreach ($target as $item) {
+                    $result[] = data_get($item, $key);
+                }
+
+                return in_array('*', $key) ? Arr::collapse($result) : $result;
+            }
+
+            if (Arr::accessible($target) && Arr::exists($target, $segment)) {
+                $target = $target[$segment];
+            } elseif (is_object($target) && isset($target->{$segment})) {
+                $target = $target->{$segment};
+            } else {
+                return value($default);
+            }
+        }
+
+        return $target;
+    }
+}
+
+if (! function_exists('data_set')) {
+    /**
+     * Set an item on an array or object using dot notation.
+     *
+     * @param  mixed  $target
+     * @param  string|array  $key
+     * @param  mixed  $value
+     * @param  bool  $overwrite
+     * @return mixed
+     */
+    function data_set(&$target, $key, $value, $overwrite = true)
+    {
+        $segments = is_array($key) ? $key : explode('.', $key);
+
+        if (($segment = array_shift($segments)) === '*') {
+            if (! Arr::accessible($target)) {
+                $target = [];
+            }
+
+            if ($segments) {
+                foreach ($target as &$inner) {
+                    data_set($inner, $segments, $value, $overwrite);
+                }
+            } elseif ($overwrite) {
+                foreach ($target as &$inner) {
+                    $inner = $value;
+                }
+            }
+        } elseif (Arr::accessible($target)) {
+            if ($segments) {
+                if (! Arr::exists($target, $segment)) {
+                    $target[$segment] = [];
+                }
+
+                data_set($target[$segment], $segments, $value, $overwrite);
+            } elseif ($overwrite || ! Arr::exists($target, $segment)) {
+                $target[$segment] = $value;
+            }
+        } elseif (is_object($target)) {
+            if ($segments) {
+                if (! isset($target->{$segment})) {
+                    $target->{$segment} = [];
+                }
+
+                data_set($target->{$segment}, $segments, $value, $overwrite);
+            } elseif ($overwrite || ! isset($target->{$segment})) {
+                $target->{$segment} = $value;
+            }
+        } else {
+            $target = [];
+
+            if ($segments) {
+                data_set($target[$segment], $segments, $value, $overwrite);
+            } elseif ($overwrite) {
+                $target[$segment] = $value;
+            }
+        }
+
+        return $target;
+    }
+}
+
 if (! function_exists('e')) {
     /**
      * Encode HTML special characters in a string.
      *
-     * @param  \Illuminate\Contracts\Support\DeferringDisplayableValue|\Illuminate\Contracts\Support\Htmlable|\BackedEnum|string|null  $value
+     * @param  \Illuminate\Contracts\Support\DeferringDisplayableValue|\Illuminate\Contracts\Support\Htmlable|string  $value
      * @param  bool  $doubleEncode
      * @return string
      */
@@ -117,11 +259,7 @@ if (! function_exists('e')) {
             return $value->toHtml();
         }
 
-        if ($value instanceof BackedEnum) {
-            $value = $value->value;
-        }
-
-        return htmlspecialchars($value ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', $doubleEncode);
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8', $doubleEncode);
     }
 }
 
@@ -152,6 +290,32 @@ if (! function_exists('filled')) {
     }
 }
 
+if (! function_exists('head')) {
+    /**
+     * Get the first element of an array. Useful for method chaining.
+     *
+     * @param  array  $array
+     * @return mixed
+     */
+    function head($array)
+    {
+        return reset($array);
+    }
+}
+
+if (! function_exists('last')) {
+    /**
+     * Get the last element from an array.
+     *
+     * @param  array  $array
+     * @return mixed
+     */
+    function last($array)
+    {
+        return end($array);
+    }
+}
+
 if (! function_exists('object_get')) {
     /**
      * Get an item from an object using "dot" notation.
@@ -163,7 +327,7 @@ if (! function_exists('object_get')) {
      */
     function object_get($object, $key, $default = null)
     {
-        if (is_null($key) || trim($key) === '') {
+        if (is_null($key) || trim($key) == '') {
             return $object;
         }
 
@@ -209,7 +373,7 @@ if (! function_exists('preg_replace_array')) {
     function preg_replace_array($pattern, array $replacements, $subject)
     {
         return preg_replace_callback($pattern, function () use (&$replacements) {
-            foreach ($replacements as $value) {
+            foreach ($replacements as $key => $value) {
                 return array_shift($replacements);
             }
         }, $subject);
@@ -220,25 +384,17 @@ if (! function_exists('retry')) {
     /**
      * Retry an operation a given number of times.
      *
-     * @param  int|array  $times
+     * @param  int  $times
      * @param  callable  $callback
-     * @param  int|\Closure  $sleepMilliseconds
+     * @param  int  $sleep
      * @param  callable|null  $when
      * @return mixed
      *
      * @throws \Exception
      */
-    function retry($times, callable $callback, $sleepMilliseconds = 0, $when = null)
+    function retry($times, callable $callback, $sleep = 0, $when = null)
     {
         $attempts = 0;
-
-        $backoff = [];
-
-        if (is_array($times)) {
-            $backoff = $times;
-
-            $times = count($times) + 1;
-        }
 
         beginning:
         $attempts++;
@@ -251,42 +407,12 @@ if (! function_exists('retry')) {
                 throw $e;
             }
 
-            $sleepMilliseconds = $backoff[$attempts - 1] ?? $sleepMilliseconds;
-
-            if ($sleepMilliseconds) {
-                Sleep::usleep(value($sleepMilliseconds, $attempts, $e) * 1000);
+            if ($sleep) {
+                usleep($sleep * 1000);
             }
 
             goto beginning;
         }
-    }
-}
-
-if (! function_exists('str')) {
-    /**
-     * Get a new stringable object from the given string.
-     *
-     * @param  string|null  $string
-     * @return \Illuminate\Support\Stringable|mixed
-     */
-    function str($string = null)
-    {
-        if (func_num_args() === 0) {
-            return new class
-            {
-                public function __call($method, $parameters)
-                {
-                    return Str::$method(...$parameters);
-                }
-
-                public function __toString()
-                {
-                    return '';
-                }
-            };
-        }
-
-        return Str::of($string);
     }
 }
 
@@ -314,23 +440,17 @@ if (! function_exists('throw_if')) {
     /**
      * Throw the given exception if the given condition is true.
      *
-     * @template TException of \Throwable
-     *
      * @param  mixed  $condition
-     * @param  TException|class-string<TException>|string  $exception
-     * @param  mixed  ...$parameters
+     * @param  \Throwable|string  $exception
+     * @param  array  ...$parameters
      * @return mixed
      *
-     * @throws TException
+     * @throws \Throwable
      */
-    function throw_if($condition, $exception = 'RuntimeException', ...$parameters)
+    function throw_if($condition, $exception, ...$parameters)
     {
         if ($condition) {
-            if (is_string($exception) && class_exists($exception)) {
-                $exception = new $exception(...$parameters);
-            }
-
-            throw is_string($exception) ? new RuntimeException($exception) : $exception;
+            throw (is_string($exception) ? new $exception(...$parameters) : $exception);
         }
 
         return $condition;
@@ -341,18 +461,18 @@ if (! function_exists('throw_unless')) {
     /**
      * Throw the given exception unless the given condition is true.
      *
-     * @template TException of \Throwable
-     *
      * @param  mixed  $condition
-     * @param  TException|class-string<TException>|string  $exception
-     * @param  mixed  ...$parameters
+     * @param  \Throwable|string  $exception
+     * @param  array  ...$parameters
      * @return mixed
      *
-     * @throws TException
+     * @throws \Throwable
      */
-    function throw_unless($condition, $exception = 'RuntimeException', ...$parameters)
+    function throw_unless($condition, $exception, ...$parameters)
     {
-        throw_if(! $condition, $exception, ...$parameters);
+        if (! $condition) {
+            throw (is_string($exception) ? new $exception(...$parameters) : $exception);
+        }
 
         return $condition;
     }
@@ -362,12 +482,12 @@ if (! function_exists('trait_uses_recursive')) {
     /**
      * Returns all traits used by a trait and its traits.
      *
-     * @param  object|string  $trait
+     * @param  string  $trait
      * @return array
      */
     function trait_uses_recursive($trait)
     {
-        $traits = class_uses($trait) ?: [];
+        $traits = class_uses($trait);
 
         foreach ($traits as $trait) {
             $traits += trait_uses_recursive($trait);
@@ -381,14 +501,10 @@ if (! function_exists('transform')) {
     /**
      * Transform the given value if it is present.
      *
-     * @template TValue of mixed
-     * @template TReturn of mixed
-     * @template TDefault of mixed
-     *
-     * @param  TValue  $value
-     * @param  callable(TValue): TReturn  $callback
-     * @param  TDefault|callable(TValue): TDefault|null  $default
-     * @return ($value is empty ? ($default is null ? null : TDefault) : TReturn)
+     * @param  mixed  $value
+     * @param  callable  $callback
+     * @param  mixed  $default
+     * @return mixed|null
      */
     function transform($value, callable $callback, $default = null)
     {
@@ -401,6 +517,19 @@ if (! function_exists('transform')) {
         }
 
         return $default;
+    }
+}
+
+if (! function_exists('value')) {
+    /**
+     * Return the default value of the given value.
+     *
+     * @param  mixed  $value
+     * @return mixed
+     */
+    function value($value)
+    {
+        return $value instanceof Closure ? $value() : $value;
     }
 }
 
@@ -420,12 +549,9 @@ if (! function_exists('with')) {
     /**
      * Return the given value, optionally passed through the given callback.
      *
-     * @template TValue
-     * @template TReturn
-     *
-     * @param  TValue  $value
-     * @param  (callable(TValue): (TReturn))|null  $callback
-     * @return ($callback is null ? TValue : TReturn)
+     * @param  mixed  $value
+     * @param  callable|null  $callback
+     * @return mixed
      */
     function with($value, callable $callback = null)
     {

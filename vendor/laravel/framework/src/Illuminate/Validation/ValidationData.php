@@ -3,11 +3,12 @@
 namespace Illuminate\Validation;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class ValidationData
 {
     /**
-     * Initialize and gather data for the given attribute.
+     * Initialize and gather data for given attribute.
      *
      * @param  string  $attribute
      * @param  array  $masterData
@@ -35,7 +36,7 @@ class ValidationData
 
         $data = static::extractDataFromPath($explicitPath, $masterData);
 
-        if (! str_contains($attribute, '*') || str_ends_with($attribute, '*')) {
+        if (! Str::contains($attribute, '*') || Str::endsWith($attribute, '*')) {
             return $data;
         }
 
@@ -54,7 +55,7 @@ class ValidationData
     {
         $keys = [];
 
-        $pattern = str_replace('\*', '[^\.]+', preg_quote($attribute, '/'));
+        $pattern = str_replace('\*', '[^\.]+', preg_quote($attribute));
 
         foreach ($data as $key => $value) {
             if ((bool) preg_match('/^'.$pattern.'/', $key, $matches)) {

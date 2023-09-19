@@ -2,13 +2,10 @@
 
 namespace Illuminate\Http\Client;
 
-use Illuminate\Support\Traits\Macroable;
 use OutOfBoundsException;
 
 class ResponseSequence
 {
-    use Macroable;
-
     /**
      * The responses in the sequence.
      *
@@ -44,13 +41,15 @@ class ResponseSequence
     /**
      * Push a response to the sequence.
      *
-     * @param  string|array|null  $body
+     * @param  string|array  $body
      * @param  int  $status
      * @param  array  $headers
      * @return $this
      */
-    public function push($body = null, int $status = 200, array $headers = [])
+    public function push($body = '', int $status = 200, array $headers = [])
     {
+        $body = is_array($body) ? json_encode($body) : $body;
+
         return $this->pushResponse(
             Factory::response($body, $status, $headers)
         );
@@ -138,16 +137,14 @@ class ResponseSequence
      * Get the next response in the sequence.
      *
      * @return mixed
-     *
-     * @throws \OutOfBoundsException
      */
     public function __invoke()
     {
-        if ($this->failWhenEmpty && $this->isEmpty()) {
+        if ($this->failWhenEmpty && count($this->responses) === 0) {
             throw new OutOfBoundsException('A request was made, but the response sequence is empty.');
         }
 
-        if (! $this->failWhenEmpty && $this->isEmpty()) {
+        if (! $this->failWhenEmpty && count($this->responses) === 0) {
             return value($this->emptyResponse ?? Factory::response());
         }
 

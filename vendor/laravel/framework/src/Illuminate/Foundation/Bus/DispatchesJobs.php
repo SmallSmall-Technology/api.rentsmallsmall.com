@@ -2,6 +2,8 @@
 
 namespace Illuminate\Foundation\Bus;
 
+use Illuminate\Contracts\Bus\Dispatcher;
+
 trait DispatchesJobs
 {
     /**
@@ -12,19 +14,17 @@ trait DispatchesJobs
      */
     protected function dispatch($job)
     {
-        return dispatch($job);
+        return app(Dispatcher::class)->dispatch($job);
     }
 
     /**
      * Dispatch a job to its appropriate handler in the current process.
      *
-     * Queueable jobs will be dispatched to the "sync" queue.
-     *
      * @param  mixed  $job
      * @return mixed
      */
-    public function dispatchSync($job)
+    public function dispatchNow($job)
     {
-        return dispatch_sync($job);
+        return app(Dispatcher::class)->dispatchNow($job);
     }
 }

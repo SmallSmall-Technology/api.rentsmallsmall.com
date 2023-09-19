@@ -2,7 +2,6 @@
 
 namespace Illuminate\Testing\Constraints;
 
-use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Connection;
 use PHPUnit\Framework\Constraint\Constraint;
 
@@ -64,7 +63,7 @@ class HasInDatabase extends Constraint
     {
         return sprintf(
             "a row in the table [%s] matches the attributes %s.\n\n%s",
-            $table, $this->toString(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), $this->getAdditionalInfo($table)
+            $table, $this->toString(JSON_PRETTY_PRINT), $this->getAdditionalInfo($table)
         );
     }
 
@@ -81,20 +80,20 @@ class HasInDatabase extends Constraint
         $similarResults = $query->where(
             array_key_first($this->data),
             $this->data[array_key_first($this->data)]
-        )->select(array_keys($this->data))->limit($this->show)->get();
+        )->limit($this->show)->get();
 
         if ($similarResults->isNotEmpty()) {
-            $description = 'Found similar results: '.json_encode($similarResults, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            $description = 'Found similar results: '.json_encode($similarResults, JSON_PRETTY_PRINT);
         } else {
             $query = $this->database->table($table);
 
-            $results = $query->select(array_keys($this->data))->limit($this->show)->get();
+            $results = $query->limit($this->show)->get();
 
             if ($results->isEmpty()) {
-                return 'The table is empty';
+                return 'The table is empty.';
             }
 
-            $description = 'Found: '.json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            $description = 'Found: '.json_encode($results, JSON_PRETTY_PRINT);
         }
 
         if ($query->count() > $this->show) {
@@ -112,10 +111,6 @@ class HasInDatabase extends Constraint
      */
     public function toString($options = 0): string
     {
-        foreach ($this->data as $key => $data) {
-            $output[$key] = $data instanceof Expression ? $data->getValue($this->database->getQueryGrammar()) : $data;
-        }
-
-        return json_encode($output ?? [], $options);
+        return json_encode($this->data, $options);
     }
 }

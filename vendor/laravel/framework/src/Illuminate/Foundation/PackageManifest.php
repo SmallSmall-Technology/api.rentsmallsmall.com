@@ -4,7 +4,6 @@ namespace Illuminate\Foundation;
 
 use Exception;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Env;
 
 class PackageManifest
 {
@@ -56,7 +55,7 @@ class PackageManifest
         $this->files = $files;
         $this->basePath = $basePath;
         $this->manifestPath = $manifestPath;
-        $this->vendorPath = Env::get('COMPOSER_VENDOR_DIR') ?: $basePath.'/vendor';
+        $this->vendorPath = $basePath.'/vendor';
     }
 
     /**
@@ -103,11 +102,11 @@ class PackageManifest
             return $this->manifest;
         }
 
-        if (! is_file($this->manifestPath)) {
+        if (! file_exists($this->manifestPath)) {
             $this->build();
         }
 
-        return $this->manifest = is_file($this->manifestPath) ?
+        return $this->manifest = file_exists($this->manifestPath) ?
             $this->files->getRequire($this->manifestPath) : [];
     }
 
@@ -155,7 +154,7 @@ class PackageManifest
      */
     protected function packagesToIgnore()
     {
-        if (! is_file($this->basePath.'/composer.json')) {
+        if (! file_exists($this->basePath.'/composer.json')) {
             return [];
         }
 

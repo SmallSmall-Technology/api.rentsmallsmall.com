@@ -11,7 +11,7 @@ use Predis\Client;
 class PredisConnector implements Connector
 {
     /**
-     * Create a new connection.
+     * Create a new clustered Predis connection.
      *
      * @param  array  $config
      * @param  array  $options
@@ -22,10 +22,6 @@ class PredisConnector implements Connector
         $formattedOptions = array_merge(
             ['timeout' => 10.0], $options, Arr::pull($config, 'options', [])
         );
-
-        if (isset($config['prefix'])) {
-            $formattedOptions['prefix'] = $config['prefix'];
-        }
 
         return new PredisConnection(new Client($config, $formattedOptions));
     }
@@ -41,10 +37,6 @@ class PredisConnector implements Connector
     public function connectToCluster(array $config, array $clusterOptions, array $options)
     {
         $clusterSpecificOptions = Arr::pull($config, 'options', []);
-
-        if (isset($config['prefix'])) {
-            $clusterSpecificOptions['prefix'] = $config['prefix'];
-        }
 
         return new PredisClusterConnection(new Client(array_values($config), array_merge(
             $options, $clusterOptions, $clusterSpecificOptions

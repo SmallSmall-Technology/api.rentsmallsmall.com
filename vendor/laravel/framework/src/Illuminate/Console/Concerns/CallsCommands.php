@@ -29,7 +29,7 @@ trait CallsCommands
     }
 
     /**
-     * Call another console command without output.
+     * Call another console command silently.
      *
      * @param  \Symfony\Component\Console\Command\Command|string  $command
      * @param  array  $arguments
@@ -38,18 +38,6 @@ trait CallsCommands
     public function callSilent($command, array $arguments = [])
     {
         return $this->runCommand($command, $arguments, new NullOutput);
-    }
-
-    /**
-     * Call another console command without output.
-     *
-     * @param  \Symfony\Component\Console\Command\Command|string  $command
-     * @param  array  $arguments
-     * @return int
-     */
-    public function callSilently($command, array $arguments = [])
-    {
-        return $this->callSilent($command, $arguments);
     }
 
     /**
@@ -64,13 +52,9 @@ trait CallsCommands
     {
         $arguments['command'] = $command;
 
-        $result = $this->resolveCommand($command)->run(
+        return $this->resolveCommand($command)->run(
             $this->createInputFromArguments($arguments), $output
         );
-
-        $this->restorePrompts();
-
-        return $result;
     }
 
     /**

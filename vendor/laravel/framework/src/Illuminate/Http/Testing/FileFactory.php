@@ -2,7 +2,7 @@
 
 namespace Illuminate\Http\Testing;
 
-use LogicException;
+use Illuminate\Support\Str;
 
 class FileFactory
 {
@@ -51,13 +51,11 @@ class FileFactory
      * @param  int  $width
      * @param  int  $height
      * @return \Illuminate\Http\Testing\File
-     *
-     * @throws \LogicException
      */
     public function image($name, $width = 10, $height = 10)
     {
         return new File($name, $this->generateImage(
-            $width, $height, pathinfo($name, PATHINFO_EXTENSION)
+            $width, $height, Str::endsWith(Str::lower($name), ['.jpg', '.jpeg']) ? 'jpeg' : 'png'
         ));
     }
 
@@ -66,33 +64,24 @@ class FileFactory
      *
      * @param  int  $width
      * @param  int  $height
-     * @param  string  $extension
+     * @param  string  $type
      * @return resource
-     *
-     * @throws \LogicException
      */
-    protected function generateImage($width, $height, $extension)
+    protected function generateImage($width, $height, $type)
     {
-        if (! function_exists('imagecreatetruecolor')) {
-            throw new LogicException('GD extension is not installed.');
-        }
-
-        return tap(tmpfile(), function ($temp) use ($width, $height, $extension) {
+        return tap(tmpfile(), function ($temp) use ($width, $height, $type) {
             ob_start();
-
-            $extension = in_array($extension, ['jpeg', 'png', 'gif', 'webp', 'wbmp', 'bmp'])
-                ? strtolower($extension)
-                : 'jpeg';
 
             $image = imagecreatetruecolor($width, $height);
 
-            if (! function_exists($functionName = "image{$extension}")) {
-                ob_get_clean();
-
-                throw new LogicException("{$functionName} function is not defined and image cannot be generated.");
+            switch ($type) {
+                case 'jpeg':
+                    imagejpeg($image);
+                    break;
+                case 'png':
+                    imagepng($image);
+                    break;
             }
-
-            call_user_func($functionName, $image);
 
             fwrite($temp, ob_get_clean());
         });

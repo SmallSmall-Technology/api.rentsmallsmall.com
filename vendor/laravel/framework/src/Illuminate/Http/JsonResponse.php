@@ -16,30 +16,19 @@ class JsonResponse extends BaseJsonResponse
     }
 
     /**
-     * Create a new JSON response instance.
+     * Constructor.
      *
      * @param  mixed  $data
      * @param  int  $status
      * @param  array  $headers
      * @param  int  $options
-     * @param  bool  $json
      * @return void
      */
-    public function __construct($data = null, $status = 200, $headers = [], $options = 0, $json = false)
+    public function __construct($data = null, $status = 200, $headers = [], $options = 0)
     {
         $this->encodingOptions = $options;
 
-        parent::__construct($data, $status, $headers, $json);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return static
-     */
-    public static function fromJsonString(?string $data = null, int $status = 200, array $headers = []): static
-    {
-        return new static($data, $status, $headers, 0, true);
+        parent::__construct($data, $status, $headers);
     }
 
     /**
@@ -67,22 +56,20 @@ class JsonResponse extends BaseJsonResponse
 
     /**
      * {@inheritdoc}
-     *
-     * @return static
      */
-    public function setData($data = []): static
+    public function setData($data = [])
     {
         $this->original = $data;
 
-        // Ensure json_last_error() is cleared...
-        json_decode('[]');
-
-        $this->data = match (true) {
-            $data instanceof Jsonable => $data->toJson($this->encodingOptions),
-            $data instanceof JsonSerializable => json_encode($data->jsonSerialize(), $this->encodingOptions),
-            $data instanceof Arrayable => json_encode($data->toArray(), $this->encodingOptions),
-            default => json_encode($data, $this->encodingOptions),
-        };
+        if ($data instanceof Jsonable) {
+            $this->data = $data->toJson($this->encodingOptions);
+        } elseif ($data instanceof JsonSerializable) {
+            $this->data = json_encode($data->jsonSerialize(), $this->encodingOptions);
+        } elseif ($data instanceof Arrayable) {
+            $this->data = json_encode($data->toArray(), $this->encodingOptions);
+        } else {
+            $this->data = json_encode($data, $this->encodingOptions);
+        }
 
         if (! $this->hasValidJson(json_last_error())) {
             throw new InvalidArgumentException(json_last_error_msg());
@@ -113,10 +100,8 @@ class JsonResponse extends BaseJsonResponse
 
     /**
      * {@inheritdoc}
-     *
-     * @return static
      */
-    public function setEncodingOptions($options): static
+    public function setEncodingOptions($options)
     {
         $this->encodingOptions = (int) $options;
 

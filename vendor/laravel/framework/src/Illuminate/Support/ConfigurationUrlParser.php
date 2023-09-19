@@ -67,7 +67,9 @@ class ConfigurationUrlParser
             'port' => $url['port'] ?? null,
             'username' => $url['user'] ?? null,
             'password' => $url['pass'] ?? null,
-        ], fn ($value) => ! is_null($value));
+        ], function ($value) {
+            return ! is_null($value);
+        });
     }
 
     /**
@@ -168,7 +170,7 @@ class ConfigurationUrlParser
     }
 
     /**
-     * Get all of the current drivers' aliases.
+     * Get all of the current drivers aliases.
      *
      * @return array
      */

@@ -70,7 +70,7 @@ class AliasLoader
      */
     public function load($alias)
     {
-        if (static::$facadeNamespace && str_starts_with($alias, static::$facadeNamespace)) {
+        if (static::$facadeNamespace && strpos($alias, static::$facadeNamespace) === 0) {
             $this->loadFacade($alias);
 
             return true;
@@ -100,7 +100,7 @@ class AliasLoader
      */
     protected function ensureFacadeExists($alias)
     {
-        if (is_file($path = storage_path('framework/cache/facade-'.sha1($alias).'.php'))) {
+        if (file_exists($path = storage_path('framework/cache/facade-'.sha1($alias).'.php'))) {
             return $path;
         }
 
