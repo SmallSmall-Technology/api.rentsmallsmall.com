@@ -15,6 +15,8 @@ use App\Http\Controllers\UnioneEmailController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    // return view('welcome');
+    return view('index');
+
 });
 Route::get('/email', [UnioneEmailController::class, 'unioneEmail']);
