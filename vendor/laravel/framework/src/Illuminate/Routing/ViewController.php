@@ -2,59 +2,38 @@
 
 namespace Illuminate\Routing;
 
-use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Contracts\View\Factory as ViewFactory;
 
 class ViewController extends Controller
 {
     /**
-     * The response factory implementation.
+     * The view factory implementation.
      *
-     * @var \Illuminate\Contracts\Routing\ResponseFactory
+     * @var \Illuminate\Contracts\View\Factory
      */
-    protected $response;
+    protected $view;
 
     /**
      * Create a new controller instance.
      *
-     * @param  \Illuminate\Contracts\Routing\ResponseFactory  $response
+     * @param  \Illuminate\Contracts\View\Factory  $view
      * @return void
      */
-    public function __construct(ResponseFactory $response)
+    public function __construct(ViewFactory $view)
     {
-        $this->response = $response;
+        $this->view = $view;
     }
 
     /**
      * Invoke the controller method.
      *
-     * @param  mixed  ...$args
-     * @return \Illuminate\Http\Response
+     * @param  array  $args
+     * @return \Illuminate\Contracts\View\View
      */
     public function __invoke(...$args)
     {
-        $routeParameters = array_filter($args, function ($key) {
-            return ! in_array($key, ['view', 'data', 'status', 'headers']);
-        }, ARRAY_FILTER_USE_KEY);
+        [$view, $data] = array_slice($args, -2);
 
-        $args['data'] = array_merge($args['data'], $routeParameters);
-
-        return $this->response->view(
-            $args['view'],
-            $args['data'],
-            $args['status'],
-            $args['headers']
-        );
-    }
-
-    /**
-     * Execute an action on the controller.
-     *
-     * @param  string  $method
-     * @param  array  $parameters
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function callAction($method, $parameters)
-    {
-        return $this->{$method}(...$parameters);
+        return $this->view->make($view, $data);
     }
 }

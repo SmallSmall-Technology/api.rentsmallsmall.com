@@ -1,42 +1,55 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * This file is part of Collision.
+ *
+ * (c) Nuno Maduro <enunomaduro@gmail.com>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
 
 namespace NunoMaduro\Collision;
 
+use NunoMaduro\Collision\Contracts\Handler as HandlerContract;
+use NunoMaduro\Collision\Contracts\Provider as ProviderContract;
 use Whoops\Run;
 use Whoops\RunInterface;
 
 /**
- * @internal
+ * This is an Collision Provider implementation.
  *
- * @see \Tests\Unit\ProviderTest
+ * @author Nuno Maduro <enunomaduro@gmail.com>
  */
-final class Provider
+class Provider implements ProviderContract
 {
     /**
      * Holds an instance of the Run.
+     *
+     * @var \Whoops\RunInterface
      */
-    private RunInterface $run;
+    protected $run;
 
     /**
      * Holds an instance of the handler.
+     *
+     * @var \NunoMaduro\Collision\Contracts\Handler
      */
-    private Handler $handler;
+    protected $handler;
 
     /**
      * Creates a new instance of the Provider.
      */
-    public function __construct(RunInterface $run = null, Handler $handler = null)
+    public function __construct(RunInterface $run = null, HandlerContract $handler = null)
     {
-        $this->run = $run ?: new Run();
+        $this->run     = $run ?: new Run();
         $this->handler = $handler ?: new Handler();
     }
 
     /**
-     * Registers the current Handler as Error Handler.
+     * {@inheritdoc}
      */
-    public function register(): self
+    public function register(): ProviderContract
     {
         $this->run->pushHandler($this->handler)
             ->register();
@@ -45,9 +58,9 @@ final class Provider
     }
 
     /**
-     * Returns the handler.
+     * {@inheritdoc}
      */
-    public function getHandler(): Handler
+    public function getHandler(): HandlerContract
     {
         return $this->handler;
     }

@@ -1,28 +1,39 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * This file is part of Collision.
+ *
+ * (c) Nuno Maduro <enunomaduro@gmail.com>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
 
 namespace NunoMaduro\Collision;
 
+use NunoMaduro\Collision\Contracts\Handler as HandlerContract;
+use NunoMaduro\Collision\Contracts\Writer as WriterContract;
 use Symfony\Component\Console\Output\OutputInterface;
 use Whoops\Handler\Handler as AbstractHandler;
 
 /**
- * @internal
+ * This is an Collision Handler implementation.
  *
- * @see \Tests\Unit\HandlerTest
+ * @author Nuno Maduro <enunomaduro@gmail.com>
  */
-final class Handler extends AbstractHandler
+class Handler extends AbstractHandler implements HandlerContract
 {
     /**
      * Holds an instance of the writer.
+     *
+     * @var \NunoMaduro\Collision\Contracts\Writer
      */
-    private Writer $writer;
+    protected $writer;
 
     /**
      * Creates an instance of the Handler.
      */
-    public function __construct(Writer $writer = null)
+    public function __construct(WriterContract $writer = null)
     {
         $this->writer = $writer ?: new Writer();
     }
@@ -30,17 +41,17 @@ final class Handler extends AbstractHandler
     /**
      * {@inheritdoc}
      */
-    public function handle(): int
+    public function handle()
     {
-        $this->writer->write($this->getInspector()); // @phpstan-ignore-line
+        $this->writer->write($this->getInspector());
 
-        return self::QUIT;
+        return static::QUIT;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function setOutput(OutputInterface $output): self
+    public function setOutput(OutputInterface $output): HandlerContract
     {
         $this->writer->setOutput($output);
 
@@ -50,7 +61,7 @@ final class Handler extends AbstractHandler
     /**
      * {@inheritdoc}
      */
-    public function getWriter(): Writer
+    public function getWriter(): WriterContract
     {
         return $this->writer;
     }

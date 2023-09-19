@@ -1,34 +1,47 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * This file is part of Collision.
+ *
+ * (c) Nuno Maduro <enunomaduro@gmail.com>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
 
 namespace NunoMaduro\Collision\Adapters\Laravel;
 
 use Illuminate\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
 use Illuminate\Support\ServiceProvider;
 use NunoMaduro\Collision\Adapters\Laravel\Commands\TestCommand;
+use NunoMaduro\Collision\Contracts\Provider as ProviderContract;
 use NunoMaduro\Collision\Handler;
 use NunoMaduro\Collision\Provider;
 use NunoMaduro\Collision\SolutionsRepositories\NullSolutionsRepository;
 use NunoMaduro\Collision\Writer;
-use Spatie\Ignition\Contracts\SolutionProviderRepository;
 
 /**
- * @internal
+ * This is an Collision Laravel Adapter Service Provider implementation.
  *
- * @final
+ * Registers the Error Handler on Laravel.
+ *
+ * @author Nuno Maduro <enunomaduro@gmail.com>
  */
 class CollisionServiceProvider extends ServiceProvider
 {
     /**
      * {@inheritdoc}
+     *
+     * @var bool
      */
-    protected bool $defer = true;
+    protected $defer = true;
 
     /**
      * Boots application services.
+     *
+     * @return void
      */
-    public function boot(): void
+    public function boot()
     {
         $this->commands([
             TestCommand::class,
@@ -38,15 +51,14 @@ class CollisionServiceProvider extends ServiceProvider
     /**
      * {@inheritdoc}
      */
-    public function register(): void
+    public function register()
     {
-        if ($this->app->runningInConsole() && ! $this->app->runningUnitTests()) {
-            $this->app->bind(Provider::class, function () {
-                if ($this->app->has(SolutionProviderRepository::class)) {
-                    /** @var SolutionProviderRepository $solutionProviderRepository */
-                    $solutionProviderRepository = $this->app->get(SolutionProviderRepository::class);
-
-                    $solutionsRepository = new IgnitionSolutionsRepository($solutionProviderRepository);
+        if ($this->app->runningInConsole() && !$this->app->runningUnitTests()) {
+            $this->app->bind(ProviderContract::class, function () {
+                if ($this->app->has(\Facade\IgnitionContracts\SolutionProviderRepository::class)) {
+                    $solutionsRepository = new IgnitionSolutionsRepository(
+                        $this->app->get(\Facade\IgnitionContracts\SolutionProviderRepository::class)
+                    );
                 } else {
                     $solutionsRepository = new NullSolutionsRepository();
                 }
@@ -57,7 +69,6 @@ class CollisionServiceProvider extends ServiceProvider
                 return new Provider(null, $handler);
             });
 
-            /** @var \Illuminate\Contracts\Debug\ExceptionHandler $appExceptionHandler */
             $appExceptionHandler = $this->app->make(ExceptionHandlerContract::class);
 
             $this->app->singleton(
@@ -74,6 +85,6 @@ class CollisionServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return [Provider::class];
+        return [ProviderContract::class];
     }
 }

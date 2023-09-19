@@ -30,19 +30,23 @@ trait InteractsWithRedis
      */
     public function setUpRedis()
     {
-        if (! extension_loaded('redis')) {
-            $this->markTestSkipped('The redis extension is not installed. Please install the extension to enable '.__CLASS__);
-        }
-
-        if (static::$connectionFailedOnceWithDefaultsSkip) {
-            $this->markTestSkipped('Trying default host/port failed, please set environment variable REDIS_HOST & REDIS_PORT to enable '.__CLASS__);
-        }
-
         $app = $this->app ?? new Application;
         $host = Env::get('REDIS_HOST', '127.0.0.1');
         $port = Env::get('REDIS_PORT', 6379);
 
-        foreach (static::redisDriverProvider() as $driver) {
+        if (! extension_loaded('redis')) {
+            $this->markTestSkipped('The redis extension is not installed. Please install the extension to enable '.__CLASS__);
+
+            return;
+        }
+
+        if (static::$connectionFailedOnceWithDefaultsSkip) {
+            $this->markTestSkipped('Trying default host/port failed, please set environment variable REDIS_HOST & REDIS_PORT to enable '.__CLASS__);
+
+            return;
+        }
+
+        foreach ($this->redisDriverProvider() as $driver) {
             $this->redis[$driver[0]] = new RedisManager($app, $driver[0], [
                 'cluster' => false,
                 'options' => [
@@ -53,17 +57,15 @@ trait InteractsWithRedis
                     'port' => $port,
                     'database' => 5,
                     'timeout' => 0.5,
-                    'name' => 'default',
                 ],
             ]);
         }
 
         try {
             $this->redis['phpredis']->connection()->flushdb();
-        } catch (Exception) {
+        } catch (Exception $e) {
             if ($host === '127.0.0.1' && $port === 6379 && Env::get('REDIS_HOST') === null) {
                 static::$connectionFailedOnceWithDefaultsSkip = true;
-
                 $this->markTestSkipped('Trying default host/port failed, please set environment variable REDIS_HOST & REDIS_PORT to enable '.__CLASS__);
             }
         }
@@ -76,14 +78,10 @@ trait InteractsWithRedis
      */
     public function tearDownRedis()
     {
-        if (isset($this->redis['phpredis'])) {
-            $this->redis['phpredis']->connection()->flushdb();
-        }
+        $this->redis['phpredis']->connection()->flushdb();
 
-        foreach (static::redisDriverProvider() as $driver) {
-            if (isset($this->redis[$driver[0]])) {
-                $this->redis[$driver[0]]->connection()->disconnect();
-            }
+        foreach ($this->redisDriverProvider() as $driver) {
+            $this->redis[$driver[0]]->connection()->disconnect();
         }
     }
 
@@ -92,7 +90,7 @@ trait InteractsWithRedis
      *
      * @return array
      */
-    public static function redisDriverProvider()
+    public function redisDriverProvider()
     {
         return [
             ['predis'],

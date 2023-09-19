@@ -3,9 +3,9 @@
 namespace Illuminate\Foundation\Console;
 
 use Illuminate\Console\Command;
-use Symfony\Component\Console\Attribute\AsCommand;
+use RuntimeException;
+use Symfony\Component\Filesystem\Filesystem as SymfonyFilesystem;
 
-#[AsCommand(name: 'storage:link')]
 class StorageLinkCommand extends Command
 {
     /**
@@ -13,9 +13,7 @@ class StorageLinkCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'storage:link
-                {--relative : Create the symbolic link using relative paths}
-                {--force : Recreate existing symbolic links}';
+    protected $signature = 'storage:link {--relative : Create the symbolic link using relative paths}';
 
     /**
      * The console command description.
@@ -31,26 +29,21 @@ class StorageLinkCommand extends Command
      */
     public function handle()
     {
-        $relative = $this->option('relative');
-
         foreach ($this->links() as $link => $target) {
-            if (file_exists($link) && ! $this->isRemovableSymlink($link, $this->option('force'))) {
-                $this->components->error("The [$link] link already exists.");
-                continue;
-            }
-
-            if (is_link($link)) {
-                $this->laravel->make('files')->delete($link);
-            }
-
-            if ($relative) {
-                $this->laravel->make('files')->relativeLink($target, $link);
+            if (file_exists($link)) {
+                $this->error("The [$link] link already exists.");
             } else {
-                $this->laravel->make('files')->link($target, $link);
-            }
+                if ($this->option('relative')) {
+                    $target = $this->getRelativeTarget($link, $target);
+                }
 
-            $this->components->info("The [$link] link has been connected to [$target].");
+                $this->laravel->make('files')->link($target, $link);
+
+                $this->info("The [$link] link has been connected to [$target].");
+            }
         }
+
+        $this->info('The links have been created.');
     }
 
     /**
@@ -65,14 +58,18 @@ class StorageLinkCommand extends Command
     }
 
     /**
-     * Determine if the provided path is a symlink that can be removed.
+     * Get the relative path to the target.
      *
      * @param  string  $link
-     * @param  bool  $force
-     * @return bool
+     * @param  string  $target
+     * @return string
      */
-    protected function isRemovableSymlink(string $link, bool $force): bool
+    protected function getRelativeTarget($link, $target)
     {
-        return is_link($link) && $force;
+        if (! class_exists(SymfonyFilesystem::class)) {
+            throw new RuntimeException('To enable support for relative links, please install the symfony/filesystem package.');
+        }
+
+        return (new SymfonyFilesystem)->makePathRelative($target, dirname($link));
     }
 }

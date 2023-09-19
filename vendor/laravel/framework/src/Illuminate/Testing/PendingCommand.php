@@ -10,7 +10,6 @@ use Illuminate\Support\Arr;
 use Mockery;
 use Mockery\Exception\NoMatchingExpectationException;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -53,14 +52,7 @@ class PendingCommand
     protected $expectedExitCode;
 
     /**
-     * The unexpected exit code.
-     *
-     * @var int
-     */
-    protected $unexpectedExitCode;
-
-    /**
-     * Determine if the command has executed.
+     * Determine if command has executed.
      *
      * @var bool
      */
@@ -142,45 +134,6 @@ class PendingCommand
     }
 
     /**
-     * Specify output that should never be printed when the command runs.
-     *
-     * @param  string  $output
-     * @return $this
-     */
-    public function doesntExpectOutput($output)
-    {
-        $this->test->unexpectedOutput[$output] = false;
-
-        return $this;
-    }
-
-    /**
-     * Specify that the given string should be contained in the command output.
-     *
-     * @param  string  $string
-     * @return $this
-     */
-    public function expectsOutputToContain($string)
-    {
-        $this->test->expectedOutputSubstrings[] = $string;
-
-        return $this;
-    }
-
-    /**
-     * Specify that the given string shouldn't be contained in the command output.
-     *
-     * @param  string  $string
-     * @return $this
-     */
-    public function doesntExpectOutputToContain($string)
-    {
-        $this->test->unexpectedOutputSubstrings[$string] = false;
-
-        return $this;
-    }
-
-    /**
      * Specify a table that should be printed when the command runs.
      *
      * @param  array  $headers
@@ -191,24 +144,12 @@ class PendingCommand
      */
     public function expectsTable($headers, $rows, $tableStyle = 'default', array $columnStyles = [])
     {
-        $table = (new Table($output = new BufferedOutput))
-            ->setHeaders((array) $headers)
-            ->setRows($rows instanceof Arrayable ? $rows->toArray() : $rows)
-            ->setStyle($tableStyle);
-
-        foreach ($columnStyles as $columnIndex => $columnStyle) {
-            $table->setColumnStyle($columnIndex, $columnStyle);
-        }
-
-        $table->render();
-
-        $lines = array_filter(
-            explode(PHP_EOL, $output->fetch())
-        );
-
-        foreach ($lines as $line) {
-            $this->expectsOutput($line);
-        }
+        $this->test->expectedTables[] = [
+            'headers' => (array) $headers,
+            'rows' => $rows instanceof Arrayable ? $rows->toArray() : $rows,
+            'tableStyle' => $tableStyle,
+            'columnStyles' => $columnStyles,
+        ];
 
         return $this;
     }
@@ -224,49 +165,6 @@ class PendingCommand
         $this->expectedExitCode = $exitCode;
 
         return $this;
-    }
-
-    /**
-     * Assert that the command does not have the given exit code.
-     *
-     * @param  int  $exitCode
-     * @return $this
-     */
-    public function assertNotExitCode($exitCode)
-    {
-        $this->unexpectedExitCode = $exitCode;
-
-        return $this;
-    }
-
-    /**
-     * Assert that the command has the success exit code.
-     *
-     * @return $this
-     */
-    public function assertSuccessful()
-    {
-        return $this->assertExitCode(Command::SUCCESS);
-    }
-
-    /**
-     * Assert that the command has the success exit code.
-     *
-     * @return $this
-     */
-    public function assertOk()
-    {
-        return $this->assertSuccessful();
-    }
-
-    /**
-     * Assert that the command does not have the success exit code.
-     *
-     * @return $this
-     */
-    public function assertFailed()
-    {
-        return $this->assertNotExitCode(Command::SUCCESS);
     }
 
     /**
@@ -307,15 +205,9 @@ class PendingCommand
                 $this->expectedExitCode, $exitCode,
                 "Expected status code {$this->expectedExitCode} but received {$exitCode}."
             );
-        } elseif (! is_null($this->unexpectedExitCode)) {
-            $this->test->assertNotEquals(
-                $this->unexpectedExitCode, $exitCode,
-                "Unexpected status code {$this->unexpectedExitCode} was received."
-            );
         }
 
         $this->verifyExpectations();
-        $this->flushExpectations();
 
         return $exitCode;
     }
@@ -346,18 +238,6 @@ class PendingCommand
         if (count($this->test->expectedOutput)) {
             $this->test->fail('Output "'.Arr::first($this->test->expectedOutput).'" was not printed.');
         }
-
-        if (count($this->test->expectedOutputSubstrings)) {
-            $this->test->fail('Output does not contain "'.Arr::first($this->test->expectedOutputSubstrings).'".');
-        }
-
-        if ($output = array_search(true, $this->test->unexpectedOutput)) {
-            $this->test->fail('Output "'.$output.'" was printed.');
-        }
-
-        if ($output = array_search(true, $this->test->unexpectedOutputSubstrings)) {
-            $this->test->fail('Output "'.$output.'" was printed.');
-        }
     }
 
     /**
@@ -368,7 +248,7 @@ class PendingCommand
     protected function mockConsoleOutput()
     {
         $mock = Mockery::mock(OutputStyle::class.'[askQuestion]', [
-            new ArrayInput($this->parameters), $this->createABufferedOutputMock(),
+            (new ArrayInput($this->parameters)), $this->createABufferedOutputMock(),
         ]);
 
         foreach ($this->test->expectedQuestions as $i => $question) {
@@ -407,6 +287,8 @@ class PendingCommand
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldIgnoreMissing();
 
+        $this->applyTableOutputExpectations($mock);
+
         foreach ($this->test->expectedOutput as $i => $output) {
             $mock->shouldReceive('doWrite')
                 ->once()
@@ -417,54 +299,37 @@ class PendingCommand
                 });
         }
 
-        foreach ($this->test->expectedOutputSubstrings as $i => $text) {
-            $mock->shouldReceive('doWrite')
-                ->atLeast()
-                ->times(0)
-                ->withArgs(fn ($output) => str_contains($output, $text))
-                ->andReturnUsing(function () use ($i) {
-                    unset($this->test->expectedOutputSubstrings[$i]);
-                });
-        }
-
-        foreach ($this->test->unexpectedOutput as $output => $displayed) {
-            $mock->shouldReceive('doWrite')
-                ->atLeast()
-                ->times(0)
-                ->ordered()
-                ->with($output, Mockery::any())
-                ->andReturnUsing(function () use ($output) {
-                    $this->test->unexpectedOutput[$output] = true;
-                });
-        }
-
-        foreach ($this->test->unexpectedOutputSubstrings as $text => $displayed) {
-            $mock->shouldReceive('doWrite')
-                 ->atLeast()
-                 ->times(0)
-                 ->withArgs(fn ($output) => str_contains($output, $text))
-                 ->andReturnUsing(function () use ($text) {
-                     $this->test->unexpectedOutputSubstrings[$text] = true;
-                 });
-        }
-
         return $mock;
     }
 
     /**
-     * Flush the expectations from the test case.
+     * Apply the output table expectations to the mock.
      *
+     * @param  \Mockery\MockInterface  $mock
      * @return void
      */
-    protected function flushExpectations()
+    private function applyTableOutputExpectations($mock)
     {
-        $this->test->expectedOutput = [];
-        $this->test->expectedOutputSubstrings = [];
-        $this->test->unexpectedOutput = [];
-        $this->test->unexpectedOutputSubstrings = [];
-        $this->test->expectedTables = [];
-        $this->test->expectedQuestions = [];
-        $this->test->expectedChoices = [];
+        foreach ($this->test->expectedTables as $consoleTable) {
+            $table = (new Table($output = new BufferedOutput))
+                ->setHeaders($consoleTable['headers'])
+                ->setRows($consoleTable['rows'])
+                ->setStyle($consoleTable['tableStyle']);
+
+            foreach ($consoleTable['columnStyles'] as $columnIndex => $columnStyle) {
+                $table->setColumnStyle($columnIndex, $columnStyle);
+            }
+
+            $table->render();
+
+            $lines = array_filter(
+                preg_split("/\n/", $output->fetch())
+            );
+
+            foreach ($lines as $line) {
+                $this->expectsOutput($line);
+            }
+        }
     }
 
     /**

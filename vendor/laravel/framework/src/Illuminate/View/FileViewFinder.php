@@ -38,7 +38,7 @@ class FileViewFinder implements ViewFinderInterface
     /**
      * Register a view extension with the finder.
      *
-     * @var string[]
+     * @var array
      */
     protected $extensions = ['blade.php', 'php', 'css', 'html'];
 
@@ -145,7 +145,9 @@ class FileViewFinder implements ViewFinderInterface
      */
     protected function getPossibleViewFiles($name)
     {
-        return array_map(fn ($extension) => str_replace('.', '/', $name).'.'.$extension, $this->extensions);
+        return array_map(function ($extension) use ($name) {
+            return str_replace('.', '/', $name).'.'.$extension;
+        }, $this->extensions);
     }
 
     /**
