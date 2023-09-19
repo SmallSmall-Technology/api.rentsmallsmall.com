@@ -3,7 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'a204289d30e39a4afa3be9b6b1d87bc312a8ac93',
+        'reference' => 'cc3694213206be97659d273713b44f907fbca7ed',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -376,7 +376,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'a204289d30e39a4afa3be9b6b1d87bc312a8ac93',
+            'reference' => 'cc3694213206be97659d273713b44f907fbca7ed',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -664,8 +664,8 @@
         'psr/log-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '1.0|2.0',
-                1 => '1.0.0 || 2.0.0 || 3.0.0',
+                0 => '1.0.0 || 2.0.0 || 3.0.0',
+                1 => '1.0|2.0',
             ),
         ),
         'psr/simple-cache' => array(
@@ -1145,6 +1145,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'unione/unione-php' => array(
+            'pretty_version' => 'v1.2.0',
+            'version' => '1.2.0.0',
+            'reference' => '87bf3fce237e2017bf5f2145421de95579a37d70',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../unione/unione-php',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'vlucas/phpdotenv' => array(
             'pretty_version' => 'v4.3.0',
             'version' => '4.3.0.0',
@@ -1160,6 +1169,15 @@
             'reference' => '87337c91b9dfacee02452244ee14ab3c43bc485a',
             'type' => 'library',
             'install_path' => __DIR__ . '/../voku/portable-ascii',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'webmozart/assert' => array(
+            'pretty_version' => '1.11.0',
+            'version' => '1.11.0.0',
+            'reference' => '11cb2199493b2f8a3b53e7f19068fc6aac760991',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../webmozart/assert',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
