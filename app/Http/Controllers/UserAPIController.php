@@ -30,9 +30,9 @@ class UserAPIController extends Controller
 
     public function userCXAPI($id=null){
         if($id){
-            $userCX = DB::table('admin_tbl')->where('staff_dept', 'cx')->where('adminID',$id)->select('firstName','lastName', 'adminID')->get();
+            $userCX = DB::table('admin_tbl')->where('staff_dept', 'cx')->where('adminID',$id)->select('firstName','lastName', 'adminID', 'email')->get();
         }else {
-            $userCX = DB::table('admin_tbl')->where('staff_dept', 'cx')->select('firstName','lastName', 'adminID')->get();
+            $userCX = DB::table('admin_tbl')->where('staff_dept', 'cx')->select('firstName','lastName', 'adminID', 'email')->get();
         }
         
         return $userCX;

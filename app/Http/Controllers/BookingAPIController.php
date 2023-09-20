@@ -71,5 +71,69 @@ class BookingAPIController extends Controller
         
         return $bookingDistinctTenant;
     }
+    
+    public function newTenantsThatBooked($id=null){
+        if($id){
+            $newTenantsThatBooked = DB::table('bookings')
+            ->join('user_tbl', 'bookings.userID', '=', 'user_tbl.userID')
+            ->join('property_tbl', 'bookings.propertyID', '=', 'property_tbl.propertyID')
+            ->select('bookings.*', 'user_tbl.firstName', 'user_tbl.lastName', 'property_tbl.propertyTitle')
+            ->where('bookings.id',$id)
+            ->get();
+        }else {
+            $newTenantsThatBooked = DB::table('bookings')
+            ->join('user_tbl', 'bookings.userID', '=', 'user_tbl.userID')
+            ->join('property_tbl', 'bookings.propertyID', '=', 'property_tbl.propertyID')
+            ->select('bookings.*', 'user_tbl.firstName', 'user_tbl.lastName', 'property_tbl.propertyTitle')
+            ->get();
+            
+
+        }
+        
+        return $newTenantsThatBooked;
+    }
+    
+    public function newSubscribersUpdateSave(Request $request)
+    {
+
+        $data = array();
+        $data['move_in_date'] = $request->move_in_date;
+        $data['move_out_date'] = $request->move_out_date;
+        $data['rent_expiration'] = $request->rent_expiration;
+        $data['next_rental'] = $request->next_rental;
+
+        $update = DB::table('bookings')->where('id', $request->id)->update($data);
+         if($update){
+            return redirect('https://rentsmallsmall.io/update-success');
+        }else{
+            return redirect('https://rentsmallsmall.io/update-failed');
+        }
+    }
+    
+    public function subscriptionDueThisMonth($id=null){
+        if($id){
+            $currentMonth = date('m');
+            $currentYear = date('Y');
+            $subscriptionDueThisMonth = DB::table('bookings')
+            ->join('user_tbl', 'bookings.userID', '=', 'user_tbl.userID')
+            ->join('property_tbl', 'bookings.propertyID', '=', 'property_tbl.propertyID')
+            ->select('bookings.*', 'user_tbl.firstName', 'user_tbl.lastName', 'property_tbl.propertyTitle')
+            ->where('bookings.id',$id)
+            ->get();
+        }else {
+            $currentMonth = date('m');
+            $currentYear = date('Y');
+            $subscriptionDueThisMonth = DB::table('bookings')
+            ->join('user_tbl', 'bookings.userID', '=', 'user_tbl.userID')
+            ->join('property_tbl', 'bookings.propertyID', '=', 'property_tbl.propertyID')
+            ->select('bookings.*', 'user_tbl.firstName', 'user_tbl.lastName', 'property_tbl.propertyTitle')
+            ->whereRaw('MONTH(bookings.next_rental) = ?',[$currentMonth])->whereRaw('YEAR(bookings.next_rental) = ?',[$currentYear])
+            ->orderBy('bookings.next_rental','desc')->get();
+            
+
+        }
+        
+        return $subscriptionDueThisMonth;
+    }
 
 }

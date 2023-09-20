@@ -16,6 +16,8 @@ use App\Http\Controllers\StaffTSRAPIController;
 use App\Http\Controllers\StaffCXAPIController;
 use App\Http\Controllers\FeedbackAPIController;
 use App\Http\Controllers\BuySmallSmallInspectionAPIController;
+use App\Http\Controllers\StaySmallSmallAPIController;
+use App\Http\Controllers\CallLogsAPIController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +35,15 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('buy-smallsmall-api-count/{id?}', [BuySmallSmallInspectionAPIController::class, 'buySmallSmallAPICount']);
+
+Route::get('buy-smallsmall-api/{id?}', [BuySmallSmallInspectionAPIController::class, 'buySmallSmallAPI']);
+
+Route::get('buy-smallsmall-property-request-api/{id?}', [BuySmallSmallInspectionAPIController::class, 'buySmallSmallPropertyRequestAPI']);
+
+Route::post('add-call-log-api',[CallLogsAPIController::class,'addCallLogAPI']);
+Route::get('call-logs-api/{id?}',[CallLogsAPIController::class,'allCallLogsAPI']);
 
 Route::get('user-api/{id?}',[UserAPIController::class,'userAPI']);
 Route::get('user-count-api/{id?}',[UserAPIController::class,'userCountAPI']);
@@ -52,6 +63,7 @@ Route::get('stafftsr-api/{id?}',[StaffTSRAPIController::class,'staffTSRAPI']);
 Route::get('staffcx-api/{id?}',[StaffCXAPIController::class,'staffCXAPI']);
 
 Route::get('property-api/{id?}',[PropertyAPIController::class,'propertyAPI']);
+Route::get('property-owner-api/{id?}',[PropertyAPIController::class,'propertyPerOwnerAPI']);
 Route::post('add-property-api',[PropertyAPIController::class,'addPropertyAPI']);
 Route::put('edit-property-api',[PropertyAPIController::class,'editPropertyAPI']);
 
@@ -88,6 +100,10 @@ Route::post('report-repair-api',[ReportRepairAPIController::class,'reportRepairA
 Route::get('booking-api/{id?}',[BookingAPIController::class,'bookingAPI']);
 Route::get('booking-distinct-count-api/{id?}',[BookingAPIController::class,'bookingDistinctCountAPI']);
 Route::get('booking-distinct-tenant-api/{id?}',[BookingAPIController::class,'bookingDistinctTenantAPI']);
+Route::get('new-tenants-api/{id?}',[BookingAPIController::class,'newTenantsThatBooked']);
+Route::put('update-new-subscribers-api', [BookingAPIController::class, 'newSubscribersUpdateSave']);
+Route::get('subscription-due-this-month-api/{id?}',[BookingAPIController::class,'subscriptionDueThisMonth']);
+
 
 Route::get('loan-eligible-api/{id?}',[LoanAPIController::class,'loanEligibleSubscribers']);
 Route::get('loan-eligible-count-api/{id?}',[LoanAPIController::class,'loanEligibleSubscribersCount']);
@@ -95,4 +111,6 @@ Route::get('loan-eligible-count-api/{id?}',[LoanAPIController::class,'loanEligib
 Route::post('feedback-api',[FeedbackAPIController::class,'feedback']);
 
 Route::get('buy-inspection-api/{id?}',[BuySmallSmallInspectionAPIController::class,'buyInspectionAPI']);
+
+Route::get('staysmallsmall-bookings-api/{id?}', [StaySmallSmallAPIController::class, 'bookingsAPI']);
 
