@@ -17,6 +17,16 @@ class PropertyAPIController extends Controller
         
         return $property;
     }
+    
+    public function propertyPerOwnerAPI($id=null){
+        if($id){
+            $propertyPerOwnerAPI = DB::table('property_tbl')->where('property_owner',$id)->get();
+        }else {
+            $propertyPerOwnerAPI = '';
+        }
+        
+        return $propertyPerOwnerAPI;
+    }
 
     public function addPropertyAPI(Request $request){
         $data = array();
