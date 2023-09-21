@@ -235,11 +235,82 @@ class InspectionAPIController extends Controller
 
         mail($to2,$subject2,$message2,$headers);
 
+        require 'vendor/autoload.php';
+
+		// Unione Template
+
+		$headers = array(
+			'Content-Type' => 'application/json',
+			'Accept' => 'application/json',
+			'X-API-KEY' => '6tkb5syz5g1bgtkz1uonenrxwpngrwpq9za1u6ha',
+		);
+
+		$client = new \GuzzleHttp\Client([
+			'base_uri' => 'https://eu1.unione.io/en/transactional/api/v1/'
+		]);
+
+		$requestBody = [
+			"id" => "936cc5e8-52e1-11ee-b5d3-eefdb2fabe59"
+		];
+
+		try {
+			$response = $client->request('POST', 'template/get.json', array(
+				'headers' => $headers,
+				'json' => $requestBody,
+			));
+
+			$jsonResponse = $response->getBody()->getContents();
+
+			$responseData = json_decode($jsonResponse, true);
+
+			$htmlBody = $responseData['template']['body']['html'];
+
+			$userName = $tsr->firstName;
+            $propertyName = $inspection_name ;
+            $propertyAddress = $propertyTitle;
+            $newDateOfVisit = $updated_inspection_date ;
+            $newInspectionTime = $updated_inspection_time;
+
+			// Replace the placeholder in the HTML body
+
+			$htmlBody = str_replace('{{Name}}', $userName, $htmlBody);
+            $htmlBody = str_replace('{{PropertyName}}', $propertyName, $htmlBody);
+            $htmlBody = str_replace('{{PropertyAddress}}', $propertyAddress, $htmlBody);
+            $htmlBody = str_replace('{{NewdateofVisit}}', $newDateOfVisit, $htmlBody);
+            $htmlBody = str_replace('{{newinspectiontime}}', $newInspectionTime, $htmlBody);
+
+			$data['response'] = $htmlBody;
+
+			// Prepare the email data
+			$emailData = [
+				"message" => [
+					"recipients" => [
+						["email" => $to2],
+					],
+					"body" => ["html" => $htmlBody],
+					"subject" => "Inspection Update",
+					"from_email" => "donotreply@smallsmall.com",
+					"from_name" => "SmallSmall Alert",
+				],
+			];
+
+			// Send the email using the Unione API
+			$responseEmail = $client->request('POST', 'email/send.json', [
+				'headers' => $headers,
+				'json' => $emailData,
+			]);
+		} catch (\GuzzleHttp\Exception\BadResponseException $e) {
+			$data['response'] = $e->getMessage();
+		}
+
+        //End Unione Email Template
 
             return redirect('https://rentsmallsmall.io/inspection-update-success');
+
         } else {
 
             // return ["update"=>"did not update"];
+
             return redirect('https://rentsmallsmall.io/inspection-update-failed');
         }
     }
