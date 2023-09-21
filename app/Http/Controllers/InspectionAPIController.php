@@ -47,88 +47,300 @@ class InspectionAPIController extends Controller
 
     public function updateInspectionAPI(Request $request)
     {
-        // Sanitize and validate the request data (Add your validation logic here)
 
         $data = [
+
             'updated_inspection_date' => $request->input('updated_inspection_date'),
+
             'assigned_tsr' => $request->input('assigned_tsr'),
+
             'inspection_status' => 'pending-assigned',
         ];
 
         // Perform the database update
+
         $update = DB::table('inspection_tbl')->where('id', $request->input('id'))->update($data);
 
         if ($update) {
-            // Fetch tenant info
+
+            // Fetch tenant info from the database table
+
             $inspectingTenantInfo = DB::table('user_tbl')->where('userID', $request->input('userID'))->first();
 
             if ($inspectingTenantInfo) {
+
                 $inspection_email = $inspectingTenantInfo->email;
+
                 $inspection_name = $inspectingTenantInfo->firstName . ' ' . $inspectingTenantInfo->lastName;
 
                 // Fetch TSR info
+
                 $assigned_tsr = $request->input('assigned_tsr');
+
                 $tsr = DB::table('admin_tbl')->where('adminID', $assigned_tsr)->first();
 
                 if ($tsr) {
-                    // Send emails
+
+                    // Send emails to tenant and TSR
+
                     $this->sendTenantEmail($inspection_email, $inspection_name, $tsr, $request);
+
                     $this->sendTSREmail($tsr, $inspection_name, $request);
+
+                }else{
+
+                    return "No TSR Data";
+
                 }
+
+            }else{
+
+                // Handle the case where there's no tenant info
+                return "No tenant info, check userID";
+
             }
 
             // Redirect on success
+
             return redirect('https://rentsmallsmall.io/inspection-update-success');
+
         }
 
         // Redirect on failure
         return redirect('https://rentsmallsmall.io/inspection-update-failed');
+
     }
 
     private function sendTenantEmail($to, $name, $tsr, $request)
     {
+
+        require 'vendor/autoload.php';
+
+        $headers = array(
+			'Content-Type' => 'application/json',
+			'Accept' => 'application/json',
+			'X-API-KEY' => '6tkb5syz5g1bgtkz1uonenrxwpngrwpq9za1u6ha',
+		);
+
+		$client = new \GuzzleHttp\Client([
+			'base_uri' => 'https://eu1.unione.io/en/transactional/api/v1/'
+		]);
+
+		$requestBody = [
+			"id" => "936cc5e8-52e1-11ee-b5d3-eefdb2fabe59"
+		];
+
         $propertyTitle = $request->input('propertyTitle');
+
         $updated_inspection_date = date('d-M-Y', strtotime($request->input('updated_inspection_date')));
+
         $updated_inspection_time = date('H:i:s', strtotime($request->input('updated_inspection_date')));
 
-        // Email content for tenant
-        $subject = "Inspection Update";
-        $message = "
-            <!-- Email content here -->
-            Hello $name,
-            Inspection Date Updated
-            This is to inform you that your inspection date for $propertyTitle has been updated to $updated_inspection_date at $updated_inspection_time GMT+1.
-            Kindly contact $tsr->firstName $tsr->lastName on $tsr->phone for inspection.
-            Thanks for choosing RentSmallSmall.
-        ";
+        // Email content for tenant 
 
-        // Send the email
-        $this->sendEmail($to, $subject, $message);
+        try {
+			$response = $client->request('POST', 'template/get.json', array(
+				'headers' => $headers,
+
+				'json' => $requestBody,
+			));
+
+			$jsonResponse = $response->getBody()->getContents();
+
+			$responseData = json_decode($jsonResponse, true);
+
+			$htmlBody = $responseData['template']['body']['html'];
+
+			$userName = $tsr->firstName;
+
+            $lastName = $tsr->lastName;
+
+            $phoneNo = $tsr->phone;
+
+            $propertyName = $inspection_name ;
+
+            $propertyAddress = $propertyTitle;
+
+            $newDateOfVisit = $updated_inspection_date ;
+
+            $newInspectionTime = $updated_inspection_time .' '. $phoneNo;
+
+			// Replace the placeholder in the HTML body
+
+			$htmlBody = str_replace('{{Name}}', $userName, $htmlBody);
+
+            $htmlBody = str_replace('{{PropertyName}}', $propertyName, $htmlBody);
+
+            $htmlBody = str_replace('{{PropertyAddress}}', $propertyAddress, $htmlBody);
+
+            $htmlBody = str_replace('{{NewdateofVisit}}', $newDateOfVisit, $htmlBody);
+
+            $htmlBody = str_replace('{{newinspectiontime}}', $newInspectionTime, $htmlBody);
+
+			$data['response'] = $htmlBody;
+
+			// Prepare the email data to send 
+			$emailData = [
+				"message" => [
+					"recipients" => [
+						["email" => $to],
+					],
+					"body" => ["html" => $htmlBody],
+
+					"subject" => "Inspection Update",
+
+					"from_email" => "donotreply@smallsmall.com",
+
+					"from_name" => "SmallSmall Alert",
+				],
+			];
+
+			// Send the email using the Unione API
+			$responseEmail = $client->request('POST', 'email/send.json', [
+				'headers' => $headers,
+
+				'json' => $emailData,
+			]);
+
+		} catch (\GuzzleHttp\Exception\BadResponseException $e) {
+
+			$data['response'] = $e->getMessage();
+
+		}
+        // $subject = "Inspection Update";
+
+        // $message = "
+        //     <!-- Email content here -->
+        //     Hello $name,
+        //     Inspection Date Updated
+        //     This is to inform you that your inspection date for $propertyTitle has been updated to $updated_inspection_date at $updated_inspection_time GMT+1.
+        //     Kindly contact $tsr->firstName $tsr->lastName on $tsr->phone for inspection.
+        //     Thanks for choosing RentSmallSmall.
+        // ";
+
+        // // Send the email
+        // $this->sendEmail($to, $subject, $message);
     }
 
     private function sendTSREmail($tsr, $tenantName, $request)
     {
+
+        require 'vendor/autoload.php';
+
+        $headers = array(
+			'Content-Type' => 'application/json',
+			'Accept' => 'application/json',
+			'X-API-KEY' => '6tkb5syz5g1bgtkz1uonenrxwpngrwpq9za1u6ha',
+		);
+
+		$client = new \GuzzleHttp\Client([
+			'base_uri' => 'https://eu1.unione.io/en/transactional/api/v1/'
+		]);
+
+		$requestBody = [
+			"id" => "936cc5e8-52e1-11ee-b5d3-eefdb2fabe59"
+		];
+
+        $propertyTitle = $request->input('propertyTitle');
+
+        $updated_inspection_date = date('d-M-Y', strtotime($request->input('updated_inspection_date')));
+
+        $updated_inspection_time = date('H:i:s', strtotime($request->input('updated_inspection_date')));
+
+        // Email content for tenant 
+
+        try {
+			$response = $client->request('POST', 'template/get.json', array(
+				'headers' => $headers,
+
+				'json' => $requestBody,
+			));
+
+			$jsonResponse = $response->getBody()->getContents();
+
+			$responseData = json_decode($jsonResponse, true);
+
+			$htmlBody = $responseData['template']['body']['html'];
+
+			$userName = $tsr->firstName;
+
+            $lastName = $tsr->lastName;
+
+            $phoneNo = $tsr->phone;
+
+            $propertyName = $inspection_name ;
+
+            $propertyAddress = $propertyTitle;
+
+            $newDateOfVisit = $updated_inspection_date ;
+
+            $newInspectionTime = $updated_inspection_time .' '. $phoneNo;
+
+			// Replace the placeholder in the HTML body
+
+			$htmlBody = str_replace('{{Name}}', "Hello TSR", $htmlBody);
+
+            $htmlBody = str_replace('{{PropertyName}}', $propertyName, $htmlBody);
+
+            $htmlBody = str_replace('{{PropertyAddress}}', $propertyAddress, $htmlBody);
+
+            $htmlBody = str_replace('{{NewdateofVisit}}', $newDateOfVisit, $htmlBody);
+
+            $htmlBody = str_replace('{{newinspectiontime}}', $newInspectionTime, $htmlBody);
+
+			$data['response'] = $htmlBody;
+
+			// Prepare the email data to send 
+			$emailData = [
+				"message" => [
+					"recipients" => [
+						["email" => $tsr->email],
+					],
+					"body" => ["html" => $htmlBody],
+
+					"subject" => "Inspection Update",
+
+					"from_email" => "donotreply@smallsmall.com",
+
+					"from_name" => "SmallSmall Alert",
+				],
+			];
+
+			// Send the email using the Unione API
+			$responseEmail = $client->request('POST', 'email/send.json', [
+				'headers' => $headers,
+
+				'json' => $emailData,
+			]);
+
+		} catch (\GuzzleHttp\Exception\BadResponseException $e) {
+
+			$data['response'] = $e->getMessage();
+
+		}
         // Similar logic for sending email to TSR
         // ...
 
         // Example email content
-        $subject = "Inspection Update";
-        $message = "Hello TSR,\nInspection Date Updated\nThis is to inform you that an inspection has been scheduled for $tenantName.";
-        // ...
 
-        // Send the email
-        $this->sendEmail($tsr->email, $subject, $message);
+        // $subject = "Inspection Update";
+        // $message = "Hello TSR,\nInspection Date Updated\nThis is to inform you that an inspection has been scheduled for $tenantName.";
+        // // ...
+
+        // // Send the email
+        // $this->sendEmail($tsr->email, $subject, $message);
+
     }
 
-    private function sendEmail($to, $subject, $message)
-    {
-        // Laravel's built-in email sending
-        Mail::raw($message, function ($mail) use ($to, $subject) {
-            $mail->to($to)
-                ->subject($subject)
-                ->from('noreply@rentsmallsmall.com', 'Inspection Update');
-        });
-    }
+    // private function sendEmail($to, $subject, $message)
+    // {
+    //     // Laravel's built-in email sending
+    //     Mail::raw($message, function ($mail) use ($to, $subject) {
+    //         $mail->to($to)
+    //             ->subject($subject)
+    //             ->from('noreply@rentsmallsmall.com', 'Inspection Update');
+    //     });
+    // }
 
     // public function updateInspectionAPI(Request $request)
     // {
