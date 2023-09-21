@@ -50,196 +50,75 @@ class InspectionAPIController extends Controller
     public function updateInspectionAPI(Request $request)
     {
 
-        $data = array();
-        $data['updated_inspection_date'] = $request->updated_inspection_date;
-        $data['assigned_tsr'] = $request->assigned_tsr;
-        // $updated_inspection_date = $data['updated_inspection_date'];
-        $updated_inspection_date = date('d-M-Y',strtotime($data['updated_inspection_date']));
-        $updated_inspection_time = date('H:i:s',strtotime($data['updated_inspection_date']));
-        $data['inspection_status'] = 'pending-assigned';
+        $data = [
 
-        $update = DB::table('inspection_tbl')->where('id', $request->id)->update($data);
+            'updated_inspection_date' => $request->input('updated_inspection_date'),
 
-        $inspectingTenantInfo = DB::table('user_tbl')->where('userID',$request->userID)->first();
-        // dd($inspectingTenantInfo);
-        $inspection_email = $inspectingTenantInfo->email;
-        $inspection_name = $inspectingTenantInfo->firstName.' '.$inspectingTenantInfo->lastName;
-        // foreach($inspectingTenantInfo as $inspectingTenantInfoSingle){
-        //     echo $inspection_email = $inspectingTenantInfoSingle['email'];
-        // }
+            'assigned_tsr' => $request->input('assigned_tsr'),
 
-        // exit;
-        $assigned_tsr = $request->assigned_tsr;
-        $tsr = DB::table('admin_tbl')->where('adminID',$assigned_tsr)->first();
+            'inspection_status' => 'pending-assigned',
+        ];
+
+        // Perform the database update
+
+        $update = DB::table('inspection_tbl')->where('id', $request->input('id'))->update($data);
 
         if ($update) {
-            // $inspection_email = 'dikcondtn@yahoo.com';
-            // Mail::send('mail.inspectionUpdate', ['name' =>'Doveway'], function($message){
-            //     $message->from('noreply@rentsmallsmall.com', 'Inspection Update');
-            //     $message->to('dikcondtn@yahoo.com');
-            // });
-            // Mail::to($form1->email)->send(new ThankYouMail($form1));
-            // Mail::to('dikcondtn@yahoo.com')->send(new InspectionEmail($data));
-            // $details = [
-            //     'title' => 'Mail from ItSolutionStuff.com',
-            //     'body' => 'This is for testing email using smtp'
-            // ];
-            // Mail::to('dikcondtn@yahoo.com')->send(new InspectionEmail($details));
-            // return ["update"=>"updated"];
-            $propertyTitle = $request->propertyTitle;
 
-            $to = $inspection_email;
-            $subject = "Inspection Update";
+            // Fetch tenant info from the database table
 
-            $message = "
-            <!---Header starts here ---->
-                <!doctype html>
-                <html>
-                <head>
-                <meta charset='utf-8'>
-                <meta name='viewport' content='width=device-width'>
-                <title></title>
-                </head>
+            $inspectingTenantInfo = DB::table('user_tbl')->where('userID', $request->input('userID'))->first();
 
-                <body style='width:100%;padding:0;margin:0;box-sizing:border-box;'>
-                    <div class='container' style='width:95%;min-height:100px;overflow:auto;margin:auto;box-sizing:border-box;'>
-                        <table width='100%'>
-                            <tr>
-                                <td width='33.3%'>&nbsp;</td>
-                                <td style='text-align:center' class='logo-container' width='33.3%'><img width='130px' src='https://www.rentsmallsmall.com/assets/img/logo-rss.png' /></td>
-                                <td width='33.3%'>&nbsp;</td>
-                            </tr>
-                        </table>
-                <!---Header ends here ---->
+            if ($inspectingTenantInfo) {
 
-                <!---Body starts here ---->
-                        <table width='100%' style='margin-top:30px'>
-                            <tr>
-                                <td width='100%'>
-                                    <div class='message-container' style='width:100%;border-radius:10px;text-align:center;background:#F2FCFB;padding:40px;'>
-                                        <div style='width:100%;	min-height:10px;overflow:auto;text-align:center;font-family:calibri;font-size:30px;margin-bottom:20px;' class='name'>Hello $inspection_name,</div>
-                                        <div style='width:100%;min-height:10px;overflow:auto;text-align:center;font-family:calibri;font-size:20px;margin-bottom:20px;' class='intro'>Inspection Date Updated</div>
-                                        <div style='width:100%;min-height:30px;	overflow:auto;text-align:center;font-family:calibri;font-size:16px;margin-bottom:20px;' class='email-body'> This is to inform you that your inspection date for $propertyTitle has been updated to $updated_inspection_date at $updated_inspection_time GMT+1</div>
-                                        <div style='width:100%;min-height:30px;	overflow:auto;text-align:center;font-family:calibri;font-size:16px;margin-bottom:20px;' class='email-body'> Kindly contact $tsr->firstName $tsr->lastName on $tsr->phone for inspection.</div>
-                                        <div style='width:100%;min-height:30px;	overflow:auto;text-align:center;font-family:calibri;font-size:16px;margin-bottom:20px;' class='email-body'> Thanks for choosing RentSmallSmall.</div>
-                                        
-                                    </div>
-                                </td>
-                            </tr>
-                        </table> 
-                <!---Body ends here ---->
+                $inspection_email = $inspectingTenantInfo->email;
 
-                <!---Footer starts here ---->
-                    <div class='footer' style='width:100%;min-height:100px;overflow:auto;margin-top:40px;padding-top:40px;border-top:1px solid #00CDA6;padding:20px;'>
-                            <div style='width:100%;min-height:10px;overflow:auto;margin-bottom:20px;font-family:avenir-regular;font-size:14px;text-align:center;' class='stay-connected-txt'>Stay connected to us</div>
-                            <div style='width:100%;min-height:10px;overflow:auto;margin-bottom:30px;text-align:center;' class='social-spc'>
-                                <ul class='social-container' style='display:inline-block;min-width:100px;min-height:10px;overflow:auto;margin:auto;list-style:none;padding:0;'>
-                                    <li style='width:70px;min-height:10px;overflow:auto;float:left;text-align:center;' class='social-item'><a href='https://www.twitter.com/rentsmallsmall'><img width='50px' height='auto' src='https://www.rentsmallsmall.com/assets/img/twitter.png' /></a></li>
-                                    <li style='width:70px;min-height:10px;overflow:auto;float:left;text-align:center;' class='social-item'><a href='https://www.facebook.com/rentsmallsmall'><img width='50px' height='auto' src='https://www.rentsmallsmall.com/assets/img/facebook.png' /></a></li>
-                                    <li style='width:70px;min-height:10px;overflow:auto;float:left;text-align:center;' class='social-item'><a href='https://www.instagram.com/rentsmallsmall'><img width='50px' height='auto' src='https://www.rentsmallsmall.com/assets/img/instagram.png' /></a></li>
-                                    <li style='width:70px;min-height:10px;overflow:auto;float:left;text-align:center;' class='social-item'><a href='https://www.linkedin.com/company/rentsmallsmall'><img width='50px' height='auto' src='https://www.rentsmallsmall.com/assets/img/linkedin.png' /></a></li>
-                                </ul>
-                            </div>
-                            <div style='width:100%;min-height:30px;overflow:auto;text-align:center;line-height:30px;font-size:14px;font-family:avenir-regular;color:#00CDA6;' class='disclaimer'>
-                                For help contact Customer experience<br />
-                                at 090 722 2669, 0903 633 9800<br /> 
-                                or email to customerexperience@rentsmallsmall.com
-                            </div>
-                        </div>
-                    </div>
-                </body>
-                </html>
-                <!---Footer ends here ---->
+                $inspection_name = $inspectingTenantInfo->firstName . ' ' . $inspectingTenantInfo->lastName;
 
-        ";
+                // Fetch TSR info
 
+                $assigned_tsr = $request->input('assigned_tsr');
 
-        //second email
-        $to2 = $tsr->email;
-        $subject2 = "Inspection Update";
+                $tsr = DB::table('admin_tbl')->where('adminID', $assigned_tsr)->first();
 
-        $message2 = "
-        <!---Header starts here ---->
-            <!doctype html>
-            <html>
-            <head>
-            <meta charset='utf-8'>
-            <meta name='viewport' content='width=device-width'>
-            <title></title>
-            </head>
+                if ($tsr) {
 
-            <body style='width:100%;padding:0;margin:0;box-sizing:border-box;'>
-                <div class='container' style='width:95%;min-height:100px;overflow:auto;margin:auto;box-sizing:border-box;'>
-                    <table width='100%'>
-                        <tr>
-                            <td width='33.3%'>&nbsp;</td>
-                            <td style='text-align:center' class='logo-container' width='33.3%'><img width='130px' src='https://www.rentsmallsmall.com/assets/img/logo-rss.png' /></td>
-                            <td width='33.3%'>&nbsp;</td>
-                        </tr>
-                    </table>
-            <!---Header ends here ---->
+                    // Send emails to tenant and TSR
 
-            <!---Body starts here ---->
-                    <table width='100%' style='margin-top:30px'>
-                        <tr>
-                            <td width='100%'>
-                                <div class='message-container' style='width:100%;border-radius:10px;text-align:center;background:#F2FCFB;padding:40px;'>
-                                    <div style='width:100%;	min-height:10px;overflow:auto;text-align:center;font-family:calibri;font-size:30px;margin-bottom:20px;' class='name'>Hello TSR,</div>
-                                    <div style='width:100%;min-height:10px;overflow:auto;text-align:center;font-family:calibri;font-size:20px;margin-bottom:20px;' class='intro'>Inspection Date Updated</div>
-                                    <div style='width:100%;min-height:30px;	overflow:auto;text-align:center;font-family:calibri;font-size:16px;margin-bottom:20px;' class='email-body'> This is to inform you that an inspection has been scheduled. The inspection details are as follows:<br> 
-                                    <strong>Prospective Native:</strong> $inspection_name <br>
-                                    <strong>Property:</strong> $propertyTitle <br>
-                                    <strong>Updated Inspection Date:</strong> $updated_inspection_date at $updated_inspection_time GMT+1</div>
-                                    
-                                </div>
-                            </td>
-                        </tr>
-                    </table> 
-            <!---Body ends here ---->
+                    $this->sendTenantEmail($inspection_email, $inspection_name, $tsr, $request);
 
-            <!---Footer starts here ---->
-                <div class='footer' style='width:100%;min-height:100px;overflow:auto;margin-top:40px;padding-top:40px;border-top:1px solid #00CDA6;padding:20px;'>
-                        <div style='width:100%;min-height:10px;overflow:auto;margin-bottom:20px;font-family:avenir-regular;font-size:14px;text-align:center;' class='stay-connected-txt'>Stay connected to us</div>
-                        <div style='width:100%;min-height:10px;overflow:auto;margin-bottom:30px;text-align:center;' class='social-spc'>
-                            <ul class='social-container' style='display:inline-block;min-width:100px;min-height:10px;overflow:auto;margin:auto;list-style:none;padding:0;'>
-                                <li style='width:70px;min-height:10px;overflow:auto;float:left;text-align:center;' class='social-item'><a href='https://www.twitter.com/rentsmallsmall'><img width='50px' height='auto' src='https://www.rentsmallsmall.com/assets/img/twitter.png' /></a></li>
-                                <li style='width:70px;min-height:10px;overflow:auto;float:left;text-align:center;' class='social-item'><a href='https://www.facebook.com/rentsmallsmall'><img width='50px' height='auto' src='https://www.rentsmallsmall.com/assets/img/facebook.png' /></a></li>
-                                <li style='width:70px;min-height:10px;overflow:auto;float:left;text-align:center;' class='social-item'><a href='https://www.instagram.com/rentsmallsmall'><img width='50px' height='auto' src='https://www.rentsmallsmall.com/assets/img/instagram.png' /></a></li>
-                                <li style='width:70px;min-height:10px;overflow:auto;float:left;text-align:center;' class='social-item'><a href='https://www.linkedin.com/company/rentsmallsmall'><img width='50px' height='auto' src='https://www.rentsmallsmall.com/assets/img/linkedin.png' /></a></li>
-                            </ul>
-                        </div>
-                        <div style='width:100%;min-height:30px;overflow:auto;text-align:center;line-height:30px;font-size:14px;font-family:avenir-regular;color:#00CDA6;' class='disclaimer'>
-                            For help contact Customer experience<br />
-                            at 090 722 2669, 0903 633 9800<br /> 
-                            or email to customerexperience@rentsmallsmall.com
-                        </div>
-                    </div>
-                </div>
-            </body>
-            </html>
-            <!---Footer ends here ---->
+                    $this->sendTSREmail($tsr, $inspection_name, $request);
 
-    ";
+                }else{
 
-            // Always set content-type when sending HTML email
-            $headers = "MIME-Version: 1.0" . "\r\n";
-            $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+                    return "No TSR Data";
 
-            // More headers
-            $headers .= 'From: <noreply@rentsmallsmall.com>' . "\r\n";
-            // $headers .= 'Cc: myboss@example.com' . "\r\n";
+                }
 
-            mail($to,$subject,$message,$headers);
+            }else{
 
-            
+                // Handle the case where there's no tenant info
+                return "No tenant info, check userID";
 
-        mail($to2,$subject2,$message2,$headers);
+            }
+
+            // Redirect on success
+
+            return redirect('https://rentsmallsmall.io/inspection-update-success');
+
+        }
+
+        // Redirect on failure
+        return redirect('https://rentsmallsmall.io/inspection-update-failed');
+
+    }
+
+    private function sendTenantEmail($to, $name, $tsr, $request)
+    {
 
         require 'vendor/autoload.php';
 
-		// Unione Template
-
-		$headers = array(
+        $headers = array(
 			'Content-Type' => 'application/json',
 			'Accept' => 'application/json',
 			'X-API-KEY' => '6tkb5syz5g1bgtkz1uonenrxwpngrwpq9za1u6ha',
@@ -253,9 +132,18 @@ class InspectionAPIController extends Controller
 			"id" => "936cc5e8-52e1-11ee-b5d3-eefdb2fabe59"
 		];
 
-		try {
+        $propertyTitle = $request->input('propertyTitle');
+
+        $updated_inspection_date = date('d-M-Y', strtotime($request->input('updated_inspection_date')));
+
+        $updated_inspection_time = date('H:i:s', strtotime($request->input('updated_inspection_date')));
+
+        // Email content for tenant 
+
+        try {
 			$response = $client->request('POST', 'template/get.json', array(
 				'headers' => $headers,
+
 				'json' => $requestBody,
 			));
 
@@ -266,30 +154,45 @@ class InspectionAPIController extends Controller
 			$htmlBody = $responseData['template']['body']['html'];
 
 			$userName = $tsr->firstName;
+
+            $lastName = $tsr->lastName;
+
+            $phoneNo = $tsr->phone;
+
             $propertyName = $inspection_name ;
+
             $propertyAddress = $propertyTitle;
+
             $newDateOfVisit = $updated_inspection_date ;
-            $newInspectionTime = $updated_inspection_time;
+
+            $newInspectionTime = $updated_inspection_time .' '. $phoneNo;
 
 			// Replace the placeholder in the HTML body
 
 			$htmlBody = str_replace('{{Name}}', $userName, $htmlBody);
+
             $htmlBody = str_replace('{{PropertyName}}', $propertyName, $htmlBody);
+
             $htmlBody = str_replace('{{PropertyAddress}}', $propertyAddress, $htmlBody);
+
             $htmlBody = str_replace('{{NewdateofVisit}}', $newDateOfVisit, $htmlBody);
+
             $htmlBody = str_replace('{{newinspectiontime}}', $newInspectionTime, $htmlBody);
 
 			$data['response'] = $htmlBody;
 
-			// Prepare the email data
+			// Prepare the email data to send 
 			$emailData = [
 				"message" => [
 					"recipients" => [
-						["email" => $to2],
+						["email" => $to],
 					],
 					"body" => ["html" => $htmlBody],
+
 					"subject" => "Inspection Update",
+
 					"from_email" => "donotreply@smallsmall.com",
+
 					"from_name" => "SmallSmall Alert",
 				],
 			];
@@ -297,44 +200,117 @@ class InspectionAPIController extends Controller
 			// Send the email using the Unione API
 			$responseEmail = $client->request('POST', 'email/send.json', [
 				'headers' => $headers,
+
 				'json' => $emailData,
 			]);
+
 		} catch (\GuzzleHttp\Exception\BadResponseException $e) {
+
 			$data['response'] = $e->getMessage();
+
 		}
-
-        //End Unione Email Template
-
-            return redirect('https://rentsmallsmall.io/inspection-update-success');
-
-        } else {
-
-            // return ["update"=>"did not update"];
-
-            return redirect('https://rentsmallsmall.io/inspection-update-failed');
-        }
     }
 
-    // public function updateInspectionStatusAPI(Request $request)
-    // {
+    private function sendTSREmail($tsr, $tenantName, $request)
+    {
 
-    //     $data = array();
-    //     $data['inspection_status'] = $request->inspection_status;
-    //     $data['inspection_remarks'] = $request->inspection_remarks;
-    //     $data['comment'] = $request->comment;
-        
-    //     $update = DB::table('inspection_tbl')->where('id', $request->id)->update($data);
-       
-    //     if ($update) {
- 
-    //         return redirect('https://rentsmallsmall.io/inspection-status-update-success');
-    //     } else {
+        require 'vendor/autoload.php';
 
-    //         // return ["update"=>"did not update"];
-    //         return redirect('https://rentsmallsmall.io/inspection-status-update-failed');
-    //     }
-    // }
-    
+        $headers = array(
+			'Content-Type' => 'application/json',
+			'Accept' => 'application/json',
+			'X-API-KEY' => '6tkb5syz5g1bgtkz1uonenrxwpngrwpq9za1u6ha',
+		);
+
+		$client = new \GuzzleHttp\Client([
+			'base_uri' => 'https://eu1.unione.io/en/transactional/api/v1/'
+		]);
+
+		$requestBody = [
+			"id" => "936cc5e8-52e1-11ee-b5d3-eefdb2fabe59"
+		];
+
+        $propertyTitle = $request->input('propertyTitle');
+
+        $updated_inspection_date = date('d-M-Y', strtotime($request->input('updated_inspection_date')));
+
+        $updated_inspection_time = date('H:i:s', strtotime($request->input('updated_inspection_date')));
+
+        // Email content for tenant 
+
+        try {
+			$response = $client->request('POST', 'template/get.json', array(
+				'headers' => $headers,
+
+				'json' => $requestBody,
+			));
+
+			$jsonResponse = $response->getBody()->getContents();
+
+			$responseData = json_decode($jsonResponse, true);
+
+			$htmlBody = $responseData['template']['body']['html'];
+
+			$userName = $tsr->firstName;
+
+            $lastName = $tsr->lastName;
+
+            $phoneNo = $tsr->phone;
+
+            $propertyName = $inspection_name ;
+
+            $propertyAddress = $propertyTitle;
+
+            $newDateOfVisit = $updated_inspection_date ;
+
+            $newInspectionTime = $updated_inspection_time .' '. $phoneNo;
+
+			// Replace the placeholder in the HTML body
+
+			$htmlBody = str_replace('{{Name}}', "Hello TSR", $htmlBody);
+
+            $htmlBody = str_replace('{{PropertyName}}', $propertyName, $htmlBody);
+
+            $htmlBody = str_replace('{{PropertyAddress}}', $propertyAddress, $htmlBody);
+
+            $htmlBody = str_replace('{{NewdateofVisit}}', $newDateOfVisit, $htmlBody);
+
+            $htmlBody = str_replace('{{newinspectiontime}}', $newInspectionTime, $htmlBody);
+
+			$data['response'] = $htmlBody;
+
+			// Prepare the email data to send 
+			$emailData = [
+				"message" => [
+					"recipients" => [
+						["email" => $tsr->email],
+					],
+					"body" => ["html" => $htmlBody],
+
+					"subject" => "Inspection Update",
+
+					"from_email" => "donotreply@smallsmall.com",
+
+					"from_name" => "SmallSmall Alert",
+				],
+			];
+
+			// Send the email using the Unione API
+			$responseEmail = $client->request('POST', 'email/send.json', [
+				'headers' => $headers,
+
+				'json' => $emailData,
+			]);
+
+		} catch (\GuzzleHttp\Exception\BadResponseException $e) {
+
+			$data['response'] = $e->getMessage();
+
+		}
+
+    }
+
+
     public function updateInspectionStatusAPI(Request $request)
     {
 
