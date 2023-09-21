@@ -58,11 +58,13 @@ class InspectionAPIController extends Controller
         $updated_inspection_time = date('H:i:s',strtotime($data['updated_inspection_date']));
         $data['inspection_status'] = 'pending-assigned';
 
+        dd($data['updated_inspection_date']);
+
         $update = DB::table('inspection_tbl')->where('id', $request->id)->update($data);
 
         $inspectingTenantInfo = DB::table('user_tbl')->where('userID',$request->userID)->first();
         dd($inspectingTenantInfo);
-        
+
         $inspection_email = $inspectingTenantInfo->email;
         $inspection_name = $inspectingTenantInfo->firstName.' '.$inspectingTenantInfo->lastName;
         // foreach($inspectingTenantInfo as $inspectingTenantInfoSingle){
