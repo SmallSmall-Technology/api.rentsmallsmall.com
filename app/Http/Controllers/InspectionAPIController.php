@@ -102,7 +102,9 @@ class InspectionAPIController extends Controller
 
             // Redirect on success
 
-            return redirect('https://rentsmallsmall.io/inspection-update-success');
+            return "redirect on success";
+
+            // return redirect('https://rentsmallsmall.io/inspection-update-success');
 
         }
 
