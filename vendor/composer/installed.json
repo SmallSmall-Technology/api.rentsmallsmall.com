@@ -7275,6 +7275,59 @@
             "install-path": "../tijsverkoyen/css-to-inline-styles"
         },
         {
+            "name": "unione/unione-php",
+            "version": "v1.2.0",
+            "version_normalized": "1.2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/unione-repo/unione-php.git",
+                "reference": "87bf3fce237e2017bf5f2145421de95579a37d70"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/unione-repo/unione-php/zipball/87bf3fce237e2017bf5f2145421de95579a37d70",
+                "reference": "87bf3fce237e2017bf5f2145421de95579a37d70",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^6.5 || ^7",
+                "php": "^7.4 || ^8.0",
+                "webmozart/assert": "^1.9.1"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.15"
+            },
+            "time": "2023-05-11T11:13:37+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Unione\\": "src",
+                    "UnioneScripts\\": "scripts"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "ECOMZ Holding Limited as UniOne",
+                    "homepage": "https://unione.io"
+                },
+                {
+                    "name": "DevBranch Ltd",
+                    "homepage": "https://dev-branch.com"
+                }
+            ],
+            "description": "The UniOne SDK package what provide methods to interact with UniOne API.",
+            "support": {
+                "issues": "https://github.com/unione-repo/unione-php/issues",
+                "source": "https://github.com/unione-repo/unione-php/tree/v1.2.0"
+            },
+            "install-path": "../unione/unione-php"
+        },
+        {
             "name": "vlucas/phpdotenv",
             "version": "v4.3.0",
             "version_normalized": "4.3.0.0",
@@ -7435,6 +7488,67 @@
                 }
             ],
             "install-path": "../voku/portable-ascii"
+        },
+        {
+            "name": "webmozart/assert",
+            "version": "1.11.0",
+            "version_normalized": "1.11.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webmozarts/assert.git",
+                "reference": "11cb2199493b2f8a3b53e7f19068fc6aac760991"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/11cb2199493b2f8a3b53e7f19068fc6aac760991",
+                "reference": "11cb2199493b2f8a3b53e7f19068fc6aac760991",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ctype": "*",
+                "php": "^7.2 || ^8.0"
+            },
+            "conflict": {
+                "phpstan/phpstan": "<0.12.20",
+                "vimeo/psalm": "<4.6.1 || 4.6.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.5.13"
+            },
+            "time": "2022-06-03T18:03:27+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.10-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Webmozart\\Assert\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bernhard Schussek",
+                    "email": "bschussek@gmail.com"
+                }
+            ],
+            "description": "Assertions to validate method input/output with nice error messages.",
+            "keywords": [
+                "assert",
+                "check",
+                "validate"
+            ],
+            "support": {
+                "issues": "https://github.com/webmozarts/assert/issues",
+                "source": "https://github.com/webmozarts/assert/tree/1.11.0"
+            },
+            "install-path": "../webmozart/assert"
         }
     ],
     "dev": true,
