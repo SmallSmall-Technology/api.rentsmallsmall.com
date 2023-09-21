@@ -61,7 +61,8 @@ class InspectionAPIController extends Controller
         $update = DB::table('inspection_tbl')->where('id', $request->id)->update($data);
 
         $inspectingTenantInfo = DB::table('user_tbl')->where('userID',$request->userID)->first();
-        // dd($inspectingTenantInfo);
+        dd($inspectingTenantInfo);
+        
         $inspection_email = $inspectingTenantInfo->email;
         $inspection_name = $inspectingTenantInfo->firstName.' '.$inspectingTenantInfo->lastName;
         // foreach($inspectingTenantInfo as $inspectingTenantInfoSingle){
