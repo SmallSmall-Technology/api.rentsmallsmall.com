@@ -167,7 +167,7 @@ class InspectionAPIController extends Controller
 
             $newDateOfVisit = $updated_inspection_date ;
 
-            $newInspectionTime = $updated_inspection_time .' '. $phoneNo;
+            $newInspectionTime = $updated_inspection_time;
 
 			// Replace the placeholder in the HTML body
 
@@ -269,7 +269,7 @@ class InspectionAPIController extends Controller
 
             $newDateOfVisit = $updated_inspection_date ;
 
-            $newInspectionTime = $updated_inspection_time .' '. $phoneNo;
+            $newInspectionTime = $updated_inspection_time;
 
 			// Replace the placeholder in the HTML body
 
