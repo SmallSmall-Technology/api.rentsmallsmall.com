@@ -73,6 +73,8 @@ class InspectionAPIController extends Controller
 
                 $inspection_email = $inspectingTenantInfo->email;
 
+                $tenant_phone = $inspectingTenantInfo->phone;
+
                 $inspection_name = $inspectingTenantInfo->firstName . ' ' . $inspectingTenantInfo->lastName;
 
                 // Fetch TSR info
@@ -87,7 +89,7 @@ class InspectionAPIController extends Controller
 
                     $this->sendTenantEmail($inspection_email, $inspection_name, $tsr, $request);
 
-                    $this->sendTSREmail($tsr, $inspection_name, $request);
+                    $this->sendTSREmail($tsr, $inspection_name, $request, $tenant_phone);
 
                 }else{
 
@@ -169,15 +171,19 @@ class InspectionAPIController extends Controller
 
 			// Replace the placeholder in the HTML body
 
-			$htmlBody = str_replace('{{Name}}', $userName, $htmlBody);
+			$htmlBody = str_replace('{{Name}}', $name, $htmlBody);
 
-            $htmlBody = str_replace('{{PropertyName}}', $propertyName, $htmlBody);
+            // $htmlBody = str_replace('{{PropertyName}}', $propertyName, $htmlBody);
 
             $htmlBody = str_replace('{{PropertyAddress}}', $propertyAddress, $htmlBody);
 
             $htmlBody = str_replace('{{NewdateofVisit}}', $newDateOfVisit, $htmlBody);
 
             $htmlBody = str_replace('{{newinspectiontime}}', $newInspectionTime, $htmlBody);
+
+            $htmlBody = str_replace('{{tsrName}', $userName, $htmlBody);
+
+            $htmlBody = str_replace('{{tsrPhone}', $phoneNo, $htmlBody);
 
 			$data['response'] = $htmlBody;
 
@@ -211,7 +217,7 @@ class InspectionAPIController extends Controller
 		}
     }
 
-    private function sendTSREmail($tsr, $tenantName, $request)
+    private function sendTSREmail($tsr, $tenantName, $request, $tenantPhone)
     {
 
         require 'vendor/autoload.php';
@@ -267,15 +273,21 @@ class InspectionAPIController extends Controller
 
 			// Replace the placeholder in the HTML body
 
-			$htmlBody = str_replace('{{Name}}', "Hello TSR", $htmlBody);
+			$htmlBody = str_replace('{{Name}}', $userName, $htmlBody);
 
-            $htmlBody = str_replace('{{PropertyName}}', $propertyName, $htmlBody);
+            // $htmlBody = str_replace('{{PropertyName}}', $propertyName, $htmlBody);
 
             $htmlBody = str_replace('{{PropertyAddress}}', $propertyAddress, $htmlBody);
 
             $htmlBody = str_replace('{{NewdateofVisit}}', $newDateOfVisit, $htmlBody);
 
             $htmlBody = str_replace('{{newinspectiontime}}', $newInspectionTime, $htmlBody);
+
+            // I changed the variable because the email is for TSR, to know the subscriber
+            
+            $htmlBody = str_replace('{{tsrName}', $tenantName, $htmlBody);
+
+            $htmlBody = str_replace('{{tsrPhone}', $tenantPhone, $htmlBody);
 
 			$data['response'] = $htmlBody;
 
