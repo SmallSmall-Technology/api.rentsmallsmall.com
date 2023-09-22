@@ -181,9 +181,9 @@ class InspectionAPIController extends Controller
 
             $htmlBody = str_replace('{{newinspectiontime}}', $newInspectionTime, $htmlBody);
 
-            $htmlBody = str_replace('{{tsrName}', $userName, $htmlBody);
+            $htmlBody = str_replace('{{tsrName}}', $userName, $htmlBody);
 
-            $htmlBody = str_replace('{{tsrPhone}', $phoneNo, $htmlBody);
+            $htmlBody = str_replace('{{tsrPhone}}', $phoneNo, $htmlBody);
 
 			$data['response'] = $htmlBody;
 
@@ -285,9 +285,9 @@ class InspectionAPIController extends Controller
 
             // I changed the variable because the email is for TSR, to know the subscriber
             
-            $htmlBody = str_replace('{{tsrName}', $tenantName, $htmlBody);
+            $htmlBody = str_replace('{{tsrName}}', $tenantName, $htmlBody);
 
-            $htmlBody = str_replace('{{tsrPhone}', $tenantPhone, $htmlBody);
+            $htmlBody = str_replace('{{tsrPhone}}', $tenantPhone, $htmlBody);
 
 			$data['response'] = $htmlBody;
 
