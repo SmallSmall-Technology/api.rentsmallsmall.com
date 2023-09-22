@@ -257,7 +257,7 @@ class InspectionAPIController extends Controller
 
             $phoneNo = $tsr->phone;
 
-            $propertyName = $inspection_name ;
+            $propertyName = $tenantName ;
 
             $propertyAddress = $propertyTitle;
 
