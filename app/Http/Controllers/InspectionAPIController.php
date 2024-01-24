@@ -123,7 +123,7 @@ class InspectionAPIController extends Controller
         $headers = array(
 			'Content-Type' => 'application/json',
 			'Accept' => 'application/json',
-			'X-API-KEY' => '6tkb5syz5g1bgtkz1uonenrxwpngrwpq9za1u6ha',
+			'X-API-KEY' => '6bgqu7a8bd7xszkz1uonenrxwpdeium56kb1kb3y',
 		);
 
 		$client = new \GuzzleHttp\Client([
@@ -225,7 +225,7 @@ class InspectionAPIController extends Controller
         $headers = array(
 			'Content-Type' => 'application/json',
 			'Accept' => 'application/json',
-			'X-API-KEY' => '6tkb5syz5g1bgtkz1uonenrxwpngrwpq9za1u6ha',
+			'X-API-KEY' => '6bgqu7a8bd7xszkz1uonenrxwpdeium56kb1kb3y',
 		);
 
 		$client = new \GuzzleHttp\Client([
@@ -628,7 +628,7 @@ Regards,
         $headers = array(
 			'Content-Type' => 'application/json',
 			'Accept' => 'application/json',
-			'X-API-KEY' => '6tkb5syz5g1bgtkz1uonenrxwpngrwpq9za1u6ha',
+			'X-API-KEY' => '6bgqu7a8bd7xszkz1uonenrxwpdeium56kb1kb3y',
 		);
 
 		$client = new \GuzzleHttp\Client([
