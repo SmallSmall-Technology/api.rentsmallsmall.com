@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Psr\Log\NullLogger;
 
+//booking class
 class BookingAPIController extends Controller
 {
     public function bookingAPI($id=null){
